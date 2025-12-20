@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>视频列表</title>
+</head>
+<body>
+<a href="http://localhost:8080/UI.html">首页</a>
+<br>
+<h1>视频列表</h1>
+<ul>
+    <li th:each="video : ${videos}">
+        <a th:href="@{/video(name=${video})}" th:text="${video}"></a>
+    </li>
+</ul>
+</body>
+</html>

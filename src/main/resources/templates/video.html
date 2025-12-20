@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>视频播放</title>
+</head>
+<body>
+<h1>视频播放</h1>
+<a href="http://localhost:8080/UI.html">首页</a>
+<br>
+<video controls>
+    <source th:src="@{/videos/{videoName}(videoName=${param.name})}" type="video/mp4">
+    您的浏览器不支持 HTML5 视频播放器。
+</video>
+</body>
+</html>

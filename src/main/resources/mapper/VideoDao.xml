@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peanut.Dao.VideoDao">
+    <select id="selectVideoListById" resultType="com.peanut.POJO.Video">
+        SELECT  `id`, `user_id`,  `video_url`,`cover_url`,`title`,`description`,
+        `like_count`,`comment_count`,`created_at`,`updated_at`,`deleted_at`
+        from `video`
+        WHERE id IN
+        <foreach collection="ids" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        AND deleted = 0
+    </select>
+</mapper>

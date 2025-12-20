@@ -1,0 +1,59 @@
+server:
+  port: 8080
+spring:
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://localhost:3306/web?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowMultiQueries=false&useSSL=false&rewriteBatchedStatements=true
+    username: root
+    password: 123456
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      password: 123456
+      lettuce:
+        pool:
+          max-active : 8
+          max-idle: 8
+          min-idle: 0
+          max-wait: 1000ms
+logging:
+  level:
+    com.pineapplesystem.PineappleSystemApplicationTests: debug
+mybatis-plus:
+#  global-config:
+#    db-config:
+#      logic-not-delete-value: 0
+#      logic-delete-value: 1
+#      meta-object-handler: none
+
+ configuration:
+  map-underscore-to-camel-case=: true
+#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+
+jwt:
+  # Access Token：30分钟过期
+  access:
+    secret: peanut-access-secret-32bytes-1234567890abcdef # 至少32位
+    expiration: 604800000 # 30*60*1000 = 1800000毫秒
+  # Refresh Token：7天过期
+  refresh:
+    secret: peanut-refresh-secret-32bytes-87654321fedcba09 # 至少32位，和access.secret不同
+    expiration: 604800000 # 7*24*60*60*1000 = 604800000毫秒
+file:
+ temp:
+  path: /file/temp/upload
+ video:
+  upload:
+    path: /file/video/upload
+
+thread:
+  pool:
+    core-size: 8
+    max-size: 16
+    keep-alive-seconds: 60                         # 非核心线程空闲超时时间
+    queue-capacity: 100                            # 队列容量

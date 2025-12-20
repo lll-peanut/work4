@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Login</title>
+    <style>
+        .hidden {
+            visibility: hidden;
+        }
+    </style>
+<!--    <script>-->
+<!--        // window.onload = function () {-->
+<!--        //     const urlParams = new URLSearchParams(window.location.search);-->
+<!--        //     const error = urlParams.get('error');-->
+<!--        //     if (error === 'true') {-->
+<!--        //         const errorMessage = document.querySelector('.hidden');-->
+<!--        //         errorMessage.style.visibility = 'visible';-->
+<!--        //     }-->
+<!--        // };-->
+<!--    </script>-->
+</head>
+<body>
+    <h1>你好，欢迎进入菠萝系统</h1>
+    <p class="hidden">登陆失败，请检查用户名是否失误</p>
+    <form action="http://localhost:8080/login" method="post">
+        帐号：<input type="text" name="username"><br>
+        密码: <input type="text" name="password"><br>
+        <button type="submit" value="sub">登陆</button>
+    </form>
+    <a href="register.html">忘记密码？没帐号？请点击注册</a>
+</body>
+</html>

@@ -1,0 +1,103 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peanut.Dao.UserRelationDao">
+
+    <select id="selectUserIdandToUserId" resultType="java.lang.Integer">
+        SELECT EXISTS(SELECT 1
+                      FROM user_relation
+                      WHERE user_id = #{userId}
+                        AND to_user_id = #{toUserId}
+                        AND status = 0) AS exist_flag
+    </select>
+
+    <insert id="insertOrUpdateFollow" parameterType="com.peanut.POJO.UserRelation"
+            useGeneratedKeys="false" keyProperty="id">
+        INSERT INTO user_relation (id, user_id, to_user_id, status, created_at, updated_at)
+        VALUES (#{id}, #{userId}, #{toUserId}, 0, NOW(), NOW()) ON DUPLICATE KEY
+        UPDATE
+            updated_at = IF(status = 1, NOW(), updated_at),
+            status = IF(status = 1, 0, status);
+    </insert>
+
+    <update id="insertOrUpdateUnFollow" parameterType="com.peanut.POJO.UserRelation">
+        UPDATE user_relation
+        SET status     = 1,
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+          AND to_user_id = #{toUserId}
+          AND status = 0 LIMIT 1;
+    </update>
+
+    <select id="getSubscribeById" resultType="com.peanut.POJO.VO.UserVO">
+        select user.avatar_url, user.username, user.id
+        from `user`
+        inner join (
+        select `to_user_id` from user_relation as ur
+        <where>
+            ur.user_id = #{userId} and ur.status = 0
+            order by `updated_at`
+            limit #{pageNum}, #{pageSize}
+        </where>
+        ) as ur_temp
+        on `user`.id = ur_temp.`to_user_id`
+    </select>
+
+    <select id="getSubscribeCountById" resultType="java.lang.Long">
+        select count(*)
+        from user_relation as ur
+        where ur.user_id = #{id}
+          and ur.status = 0
+    </select>
+
+    <select id="getsubscriberById" resultType="com.peanut.POJO.VO.UserVO">
+        select user.avatar_url, user.username, user.id
+        from `user`
+        inner join (
+        select `user_id` from user_relation as ur
+        <where>
+            ur.to_user_id = #{userId} and ur.status = 0
+            order by `updated_at`
+            limit #{pageNum}, #{pageSize}
+        </where>
+        ) as ur_temp
+        on `user`.id = ur_temp.`user_id`
+    </select>
+
+    <select id="getsubscriberCountById" resultType="java.lang.Long">
+        select count(*)
+        from user_relation as ur
+        where ur.to_user_id = #{id}
+          and ur.status = 0
+    </select>
+
+    <select id="getFriendsById" resultType="com.peanut.POJO.VO.UserVO">
+        select user.avatar_url, user.username, user.id
+        from `user`
+                 inner join (select ur2.`user_id`
+                             from (
+                                      select ur1.to_user_id, ur1.updated_at
+                                      from user_relation as ur1
+                                      where ur1.user_id = #{userId}
+                                        and ur1.status = 0
+                                      order by ur1.updated_at DESC limit 0, 10) as ur1_temp
+                                      INNER JOIN user_relation ur2
+                                                 ON ur1_temp.to_user_id = ur2.user_id
+                                                     AND #{userId} = ur2.to_user_id
+                                                     AND ur2.status = 0) as ur_temp on `user`.id = ur_temp.`user_id`
+    </select>
+
+    <select id="getFriendsCountById" resultType="java.lang.Long">
+        SELECT COUNT(*)
+        FROM (SELECT 1
+              FROM user_relation ur1
+                       INNER JOIN user_relation ur2
+                                  ON ur1.user_id = ur2.to_user_id
+                                      AND ur1.to_user_id = ur2.user_id
+              WHERE ur1.user_id = #{id}
+                AND ur1.status = 0
+                AND ur2.status = 0) AS temp;
+    </select>
+
+</mapper>
