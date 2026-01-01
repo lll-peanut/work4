@@ -24,6 +24,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ZSetOperations;
 import org.springframework.scheduling.annotation.Async;
@@ -60,11 +61,11 @@ public class VideoServiceImp implements VideoService {
     @Autowired
     private RedisTemplate redisTemplate;
 
+    @Value("${base.path}")
+    private String basePath;
 
-    private static final String SYSTEM_FOLDER = FileUtil.rootPath;
-
-    private static final String COVER_FOLDER = SYSTEM_FOLDER + "/file/cover/upload/";
-    private static final String VIDEO_FOLDER = SYSTEM_FOLDER + "/file/video/upload/";
+    private static final String COVER_FOLDER = "/file/cover/upload/";
+    private static final String VIDEO_FOLDER = "/file/video/upload/";
 
     // Redis ZSET 键常量（视频点击量：key=video:visit:count，field=视频ID，score=点击量）
     private static final String VIDEO_VISIT_RANK_KEY = "video:visit:count";
@@ -122,15 +123,19 @@ public class VideoServiceImp implements VideoService {
                     3600, TimeUnit.SECONDS);
             log.info("视频投稿异步任务执行成功 | taskId: {} | videoId: {} | userId: {}",
                     taskId, video.getId(), userId);
+            FilePersistenceUtil.deletePersistedFile(videoFilePath);
+            FilePersistenceUtil.deletePersistedFile(coverFilePath);
         } catch (Exception e) {
             if (videoPath != null) {
+                log.error(e.getMessage());
                 cleanFile(videoPath);
             }
             if (coverPath != null) {
+                log.error(e.getMessage());
                 cleanFile(coverPath);
             }
             redisTemplate.opsForValue().set("video:task:" + taskId,
-                    JSON.toJSONString(AsyncTaskResult.fail("上传失败", taskId)),
+                    JSON.toJSONString(AsyncTaskResult.fail("上传失败" + e.getMessage(), taskId)),
                     3600, TimeUnit.SECONDS);
             log.error("视频投稿异步任务执行失败 | taskId: {} | userId: {} | 视频路径: {} | 封面路径: {}",
                     taskId, userId, videoPath, coverPath, e);
@@ -141,17 +146,28 @@ public class VideoServiceImp implements VideoService {
     public String postVideo(String filePath) {
         // todo 文件上传可以优化
         String url = UUID.randomUUID() + ".mp4";
+        Path targetPath = null;
         try {
             Path sourcePath = Paths.get(filePath); // 源文件Path
-            Path targetPath = Paths.get(VIDEO_FOLDER, url); // 目标文件Path（推荐拼接方式）
+            targetPath = Paths.get(basePath, VIDEO_FOLDER, url); // 目标文件Path（推荐拼接方式）
+            Path parentDir = targetPath.getParent();
+
+            // 2. 关键：递归创建父目录（如果已存在，不会报错）
+            if (parentDir != null) { // 防止父路径为 null（比如 targetPath 是根路径）
+                Files.createDirectories(parentDir);
+                System.out.println("父目录创建成功：" + parentDir);
+            } else {
+                System.out.println("targetPath 无父目录（根路径），无需创建");
+            }
             Files.copy(
                     sourcePath,
                     targetPath,
                     StandardCopyOption.REPLACE_EXISTING // 覆盖已存在的文件（可选，根据需求调整）
             );
-            return VIDEO_FOLDER + url;
+            return targetPath.toString();
         } catch (IOException e) {
-            cleanFile(VIDEO_FOLDER + url);
+            log.error(e.getMessage());
+            cleanFile(targetPath.toString());
             throw new SystemException(e.getMessage());
         }
     }
@@ -159,17 +175,28 @@ public class VideoServiceImp implements VideoService {
     @Override
     public String postVideoCover(String coverPath) {
         String url = UUID.randomUUID() + ".png";
+        Path targetPath = null;
         try {
             Path sourcePath = Paths.get(coverPath); // 源文件Path
-            Path targetPath = Paths.get(COVER_FOLDER, url); // 目标文件Path（推荐拼接方式）
+            targetPath = Paths.get(basePath, COVER_FOLDER, url); // 目标文件Path（推荐拼接方式）
+            Path parentDir = targetPath.getParent();
+
+            // 2. 关键：递归创建父目录（如果已存在，不会报错）
+            if (parentDir != null) { // 防止父路径为 null（比如 targetPath 是根路径）
+                Files.createDirectories(parentDir);
+                System.out.println("父目录创建成功：" + parentDir);
+            } else {
+                System.out.println("targetPath 无父目录（根路径），无需创建");
+            }
             Files.copy(
                     sourcePath,
                     targetPath,
                     StandardCopyOption.REPLACE_EXISTING // 覆盖已存在的文件（可选，根据需求调整）
             );
-            return COVER_FOLDER + url;
+            return targetPath.toString();
         } catch (IOException e) {
-            cleanFile(COVER_FOLDER + url);
+            log.error(e.getMessage());
+            cleanFile(targetPath.toString());
             throw new SystemException(e.getMessage());
         }
     }
@@ -193,6 +220,10 @@ public class VideoServiceImp implements VideoService {
     }
 
     private void cleanFile(String path) {
+        if (path == null) {
+            log.info("路径是空的");
+            return;
+        }
         File file = new File(path);
         if (file.exists()) {
             file.delete();

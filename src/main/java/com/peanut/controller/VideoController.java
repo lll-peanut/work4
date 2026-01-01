@@ -50,6 +50,9 @@ public class VideoController {
     @Autowired
     private UserService userService;
 
+    @Autowired
+    private FilePersistenceUtil filePersistenceUtil;
+
     /**
      * 上传视频以及视频封面
      *
@@ -67,8 +70,8 @@ public class VideoController {
         try {
             String taskId = UUID.randomUUID().toString();
             validateUploadFile(file, cover, taskId);
-            String videoFilePath = FilePersistenceUtil.persistFile(file, taskId, "video");
-            String coverFilePath = FilePersistenceUtil.persistFile(cover, taskId, "cover");
+            String videoFilePath = filePersistenceUtil.persistFile(file, taskId, "video");
+            String coverFilePath = filePersistenceUtil.persistFile(cover, taskId, "cover");
             videoService.postVideoAndCover(publishDTO, userId, videoFilePath, coverFilePath, taskId);
             logger.info("视频投稿任务已提交 | userId: {} | taskId: {}", userId, taskId);
             return Resp.success("视频投稿任务已提交，正在处理中" +

@@ -22,8 +22,8 @@ import org.aspectj.lang.reflect.MethodSignature;
 @Aspect
 public class SystemLogAspect {
 
-    //todo 之后可以加本地缓存id，然后日志输出id .dockerignore
-
+    //todo 之后可以加本地缓存id，然后日志输出id .dockerignore 路径问题
+    // github仓库里的配置文件
     private static Logger logger = LoggerFactory.getLogger(SystemLogAspect.class);
 
     @Pointcut("@annotation(com.peanut.annotation.SystemLog)")

@@ -21,4 +21,6 @@ public interface InterationService {
     List<Comment> getCommentList(String videoId, String commentId, int pageNum, int pageSize);
 
     void deleteComment(String userId, String videoId, String commentId);
+
+    void likeToMysql();
 }

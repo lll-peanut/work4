@@ -1,5 +1,9 @@
 server:
   port: 8080
+  tomcat:
+    basedir: ${base.path}/tomcat
+    temp-dir: ${server.tomcat.basedir}/temp  # 显式指定Tomcat临时目录
+    max-swallow-size: -1           # 禁用Tomcat的文件大小限制（避免截断）
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
@@ -23,7 +27,7 @@ spring:
           max-wait: 1000ms
 logging:
   level:
-    com.pineapplesystem.PineappleSystemApplicationTests: debug
+   com.pineapplesystem.PineappleSystemApplicationTests: debug
 mybatis-plus:
 #  global-config:
 #    db-config:
@@ -50,6 +54,9 @@ file:
  video:
   upload:
     path: /file/video/upload
+ avator:
+   upload:
+     path: /file/avator/upload
 
 thread:
   pool:

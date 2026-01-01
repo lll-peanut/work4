@@ -48,7 +48,21 @@ public class DefaultSecurityConfig {
         return new DefaultAuthenticationEventPublisher(delegate);
     }
 
-    // 核心：配置登录行为，指定你的自定义 /login 页
+    //需要放行的页面
+    private static final String[] PERMIT_ALL_PATHS = {
+            "/user/login",          // 实际登录校验
+            "/user/register",       // 注册
+            "/token/refresh",       // 令牌刷新
+            "/user/info",           // 查看指定用户信息
+            "/video/list",          // 根据 user_id 查看指定人的发布列表
+            "/video/popular",       // 根据点击量（visit_count）获取排行榜数据
+            "/video/search",        // 搜索指定关键字的视频
+            "/like/list",           // 返回指定用户点赞的视频
+            "/following/list",      // 根据 user_id 查看指定人的关注列表
+            "/follower/list",       // 根据 user_id 查看指定人的粉丝列表
+    };
+
+    // 核心：配置登录行为，指定你的自定义 /login 页 并且放行页面
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable()) // 测试环境简化，生产环境可开启
@@ -56,18 +70,14 @@ public class DefaultSecurityConfig {
                         .sessionCreationPolicy(SessionCreationPolicy.STATELESS)
                 )
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/user/login").permitAll() // 放行实际登录校验接口
-                        .requestMatchers("/empty-login", "/user/register", "/token/refresh").permitAll() // 放行占位符路径（无实际资源）
-                        .requestMatchers("/user/register").permitAll()
+                        .requestMatchers(PERMIT_ALL_PATHS).permitAll()
                         .anyRequest().authenticated() // 其他所有接口需要登录
                 )
                 .formLogin(form -> form
-                        .loginPage("/empty-login") // 指定你的自定义登录页路径（关键！）
                         .loginProcessingUrl("/user/login")
                         .successHandler(loginSuccessHandler)
                         .failureHandler(loginFailureHandler)
                         .permitAll()
-
                 )
                 .exceptionHandling(ex -> ex
                         .authenticationEntryPoint((request, response, authException) -> {

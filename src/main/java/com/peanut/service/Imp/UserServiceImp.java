@@ -8,6 +8,7 @@ import com.peanut.expection.SystemException;
 import com.peanut.service.UserService;
 import com.peanut.utils.FileUtil;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
@@ -24,6 +25,12 @@ public class UserServiceImp implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Value("${file.avator.upload.path}")
+    private String avatorPath;
+
+    @Value("${base.path}")
+    private String SystemPath;
 
     @Override
     public List<User> select() {
@@ -100,9 +107,9 @@ public class UserServiceImp implements UserService {
             throw new BusinessException("文件需要以图片形式上传");
         }
 
-        String avatarPath = FileUtil.rootPath + File.separator + "file" + File.separator + "avatar" + File.separator;
+        String avatarPath = SystemPath + avatorPath;
         String FileName = UUID.randomUUID() + originalFileName.substring(originalFileName.lastIndexOf("."));
-        String FilePath = avatarPath + FileName;
+        String FilePath = avatarPath + File.separator + FileName;
         File dest = new File(FilePath);
         if (!dest.getParentFile().exists()) {
             dest.getParentFile().mkdirs();

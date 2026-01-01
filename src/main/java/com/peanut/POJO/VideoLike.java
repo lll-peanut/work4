@@ -16,9 +16,9 @@ public class VideoLike {
 
     @JsonIgnore
     @TableField("is_cancel")
-    private boolean isCancel;
+    private Integer isCancel;
 
-    public VideoLike(String userId, String videoId, String id, boolean isCancel) {
+    public VideoLike(String userId, String videoId, String id, Integer isCancel) {
         this.userId = userId;
         this.videoId = videoId;
         this.id = id;
@@ -57,11 +57,11 @@ public class VideoLike {
         this.id = id;
     }
 
-    public boolean isCancel() {
+    public Integer isCancel() {
         return isCancel;
     }
 
-    public void setCancel(boolean cancel) {
+    public void setCancel(Integer cancel) {
         isCancel = cancel;
     }
 }
