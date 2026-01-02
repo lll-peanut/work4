@@ -8,21 +8,27 @@ import com.peanut.Dao.UserDao;
 import com.peanut.Dao.VideoDao;
 import com.peanut.Dao.VideoLikeDao;
 import com.peanut.POJO.*;
+import com.peanut.POJO.DTO.VideoLikeCountIncrementDTO;
 import com.peanut.expection.BusinessException;
 import com.peanut.service.InterationService;
 import com.peanut.service.VideoService;
 import com.peanut.utils.PageUtil;
 import com.peanut.utils.RedisUtil;
 import org.redisson.api.RedissonClient;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.Cursor;
 import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.data.redis.core.ScanOptions;
 import org.springframework.data.redis.core.script.DefaultRedisScript;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.interceptor.TransactionAspectSupport;
 import org.springframework.util.CollectionUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.*;
 
@@ -49,6 +55,8 @@ public class InterationServiceImp implements InterationService {
 
     @Autowired
     VideoLikeDao videoLikeDao;
+
+    private static final Logger log = LoggerFactory.getLogger(InterationServiceImp.class);
 
     @Override
     public void likeVideo(String userId, String videoId, Integer isLike) {
@@ -364,46 +372,106 @@ public class InterationServiceImp implements InterationService {
 
 
     @Override
+    @Transactional(rollbackFor = Exception.class)
     public void likeToMysql() {
         String redisLikeKey = RedisUtil.VIDEO_LIKE;
-        Map<Object, Object> likeMap = redisTemplate.opsForHash().entries(redisLikeKey);
+        // 1. 使用游标分批扫描 Redis Hash
+        Cursor<Map.Entry<Object, Object>> cursor = null;
+        try {
+            cursor = redisTemplate.opsForHash().scan(redisLikeKey, ScanOptions.scanOptions()
+                    .count(1000) // 每批获取1000条
+                    .build());
 
-        // 空判断：如果Redis中无点赞数据，直接返回，避免无效操作
-        if (likeMap == null || likeMap.isEmpty()) {
-            return;
-        }
-        // 2. 解析 Redis 数据，转换为数据库可操作的实体/参数列表
-        List<VideoLike> likeList = new ArrayList<>(); // 点赞关系实体（需你根据实际表结构定义）
-        // 遍历Redis Hash中的所有键值对（FIELD=userId_videoId，VALUE=isLike）
-        for (Map.Entry<Object, Object> entry : likeMap.entrySet()) {
-            // 解析 FIELD：userId_videoId -> 拆分出用户ID和视频ID
-            String field = (String) entry.getKey();
-            String[] idArr = field.split("_"); // 与 RedisUtil.getKey(userId, videoId) 拆分规则一致
-            if (idArr.length != 2) {
-                continue; // 无效格式，跳过
+            while (cursor.hasNext()) {
+                // 2. 解析 Redis 数据，转换为数据库可操作的实体/参数列表
+                List<VideoLike> likeList = new ArrayList<>();
+                Map<String, Integer> videoLikeCountMap = new HashMap<>();
+                Set<Object> keysToDelete = new HashSet<>();
+                // 收集当前批次的数据（最多1000条）
+                int batchSize = 0;
+                while (cursor.hasNext() && batchSize < 1000) {
+                    Map.Entry<Object, Object> entry = cursor.next();
+                    // 遍历Redis Hash中的所有键值对（FIELD=userId_videoId，VALUE=isLike）
+                    // 解析 FIELD：userId_videoId -> 拆分出用户ID和视频ID
+                    String field = (String) entry.getKey();
+                    String[] idArr = field.split("_"); // 与 RedisUtil.getKey(userId, videoId) 拆分规则一致
+                    if (idArr.length != 2) {
+                        continue; // 无效格式，跳过
+                    }
+                    String userId = idArr[0];
+                    String videoId = idArr[1];
+                    Integer isLike = Integer.valueOf((String) entry.getValue()); // 解析 VALUE：点赞状态（1=点赞，0=取消点赞）
+                    // 封装为数据库实体
+                    VideoLike videoLike = new VideoLike();
+                    videoLike.setUserId(userId);
+                    videoLike.setVideoId(videoId);
+                    videoLike.setCancel(isLike);
+                    likeList.add(videoLike);
+                    keysToDelete.add(field);
+                    batchSize++;
+                }
+                // 处理当前批次
+                if (!likeList.isEmpty()) {
+                    processBatch(likeList, videoLikeCountMap, keysToDelete);
+                }
+
+                // 每批处理完后提交事务，避免大事务
+                TransactionAspectSupport.currentTransactionStatus().flush();
             }
-            String userId = idArr[0];
-            String videoId = idArr[1];
-            Integer isLike = Integer.valueOf((String) entry.getValue()); // 解析 VALUE：点赞状态（1=点赞，0=取消点赞）
+        }  catch (Exception e) {
+            log.error("同步点赞数据到MySQL失败", e);
+            throw e;
+        } finally {
+            if (cursor != null && !cursor.isClosed()) {
+                cursor.close();
+            }
+        }
+    }
 
-            // 封装为数据库实体
-            VideoLike videoLike = new VideoLike();
-            videoLike.setUserId(userId);
-            videoLike.setVideoId(videoId);
-            videoLike.setCancel(isLike);
-            likeList.add(videoLike);
+    /**
+     * 处理单个批次的数据
+     */
+    private void processBatch(List<VideoLike> likeList,
+                              Map<String, Integer> videoLikeCountMap,
+                              Set<Object> keysToDelete) {
+        List<VideoLike> originalLikes = videoLikeDao.batchQueryByUserAndVideo(likeList);
+        for (VideoLike videoLike : originalLikes) {
+            String videoId = videoLike.getVideoId();
+            Integer isCancel = videoLike.isCancel();
+            int currentCount = videoLikeCountMap.getOrDefault(videoId, 0);
+            if (isCancel != null) {
+                if (isCancel == 1) {
+                    // 如果是取消状态，计数加1
+                    currentCount++;
+                } else if (isCancel == 0) {
+                    // 如果不是取消状态，计数减1
+                    currentCount--;
+                }
+            }
+            videoLikeCountMap.put(videoId, currentCount);
         }
 
         // 3. 批量同步到 MySQL 数据库（分两种场景：新增/更新 点赞关系、更新视频总点赞数）
         if (!likeList.isEmpty()) {
             // 3.1 批量处理用户-视频点赞关系（按需选择：批量新增或批量更新）
             videoLikeDao.batchSaveOrUpdateVideoLike(likeList);
+            if (!videoLikeCountMap.isEmpty()) {
+                List<VideoLikeCountIncrementDTO> incrementList = new ArrayList<>();
+                // 遍历视频点赞数字典，批量更新视频表的点赞数字段
+                for (Map.Entry<String, Integer> entry : videoLikeCountMap.entrySet()) {
+                    VideoLikeCountIncrementDTO dto = new VideoLikeCountIncrementDTO();
+                    dto.setVideoId(entry.getKey());
+                    dto.setTotalIncrement(entry.getValue());
+                    incrementList.add(dto);
+                }
+                // 假设视频表实体为Video，点赞数字段为likeCount，此处为更新逻辑
+                videoDao.batchUpdateVideoLikeCount(incrementList);
+            }
         }
 
         // 4. 同步完成后，清空 Redis 中已同步的点赞数据（避免重复同步）
-        Set<Object> keysToDelete = likeMap.keySet();
         if (!keysToDelete.isEmpty()) {
-            redisTemplate.opsForHash().delete(redisLikeKey, keysToDelete.toArray());
+            redisTemplate.opsForHash().delete(RedisUtil.VIDEO_LIKE, keysToDelete.toArray());
         }
     }
 }

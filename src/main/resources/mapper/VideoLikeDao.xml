@@ -8,11 +8,24 @@
         VALUES
         <foreach collection="list" item="item" separator=",">
             (
-             #{item.id}, #{item.videoId}, #{item.userId}, #{item.isCancel}
+            #{item.id}, #{item.videoId}, #{item.userId}, #{item.isCancel}
             )
         </foreach>
         ON DUPLICATE KEY
         UPDATE
-            is_cancel = VALUES(is_cancel)
+        is_cancel = VALUES(is_cancel)
     </insert>
+
+
+    <select id="batchQueryByUserAndVideo" resultType="com.peanut.POJO.VideoLike">
+        SELECT user_id AS userId,video_id as videoId, is_cancel as isCancel
+        FROM video_like
+        <where>
+            <foreach collection="videoLikes" item="item" separator="OR">
+                (
+                user_id = #{item.userId} AND video_id = #{item.videoId} AND is_cancel &lt;&gt; #{item.isCancel}
+                )
+            </foreach>
+        </where>
+    </select>
 </mapper>

@@ -4,7 +4,7 @@
 
 <mapper namespace="com.peanut.Dao.VideoDao">
     <select id="selectVideoListById" resultType="com.peanut.POJO.Video">
-        SELECT  `id`, `user_id`,  `video_url`,`cover_url`,`title`,`description`,
+        SELECT `id`, `user_id`, `video_url`,`cover_url`,`title`,`description`,
         `like_count`,`comment_count`,`created_at`,`updated_at`,`deleted_at`
         from `video`
         WHERE id IN
@@ -13,4 +13,12 @@
         </foreach>
         AND deleted = 0
     </select>
-</mapper>
+
+    <update id="batchUpdateVideoLikeCount">
+        <foreach collection="list" item="item" separator=";">
+            UPDATE video
+            SET like_count = like_count + #{item.totalIncrement}
+            WHERE video_id = #{item.videoId}
+        </foreach>
+    </update>
+        </mapper>
