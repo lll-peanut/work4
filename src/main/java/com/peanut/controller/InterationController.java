@@ -1,6 +1,5 @@
 package com.peanut.controller;
 
-import com.peanut.Dao.LikeDao;
 import com.peanut.POJO.*;
 import com.peanut.annotation.CurrentUserId;
 import com.peanut.annotation.RedisLimitOnClassAnnotation;
@@ -54,9 +53,12 @@ public class InterationController {
     @PostMapping("/like/action")
     public Resp like(@RequestParam(value = "video_id", required = false) String videoId,
                      @RequestParam(value = "comment_id", required = false) String commentId,
-                     @RequestParam("action_type") int actionType,
+                     @RequestParam("action_type") Integer actionType,
                      @CurrentUserId String userId) {
         validateVideoIdAndCommentId(videoId, commentId);
+        if (actionType != 1 && actionType != 0) {
+            throw new BusinessException("点赞类型只能是1和0");
+        }
         if (StringUtils.hasText(videoId)) {
             interationService.likeVideo(userId, videoId, actionType);
             logger.info(VIDEO_LIKE_SUCCESS, userId, videoId, actionType == 1 ? OPERATION_LIKE : OPERATION_CANCEL_LIKE);

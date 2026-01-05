@@ -2,9 +2,8 @@ package com.peanut.Dao;
 
 
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
-import com.peanut.POJO.DTO.VideoLikeCountIncrementDTO;
+import com.peanut.POJO.DTO.LikeCountIncrementDTO;
 import com.peanut.POJO.Video;
-import com.peanut.POJO.VideoLike;
 import org.apache.ibatis.annotations.Param;
 import org.apache.ibatis.annotations.Select;
 import org.apache.ibatis.annotations.Update;
@@ -26,5 +25,5 @@ public interface VideoDao extends BaseMapper<Video> {
      * 批量更新视频点赞数
      * @param videoLikeIncrementList 视频ID-增量 列表
      */
-    void batchUpdateVideoLikeCount(@Param("list") List<VideoLikeCountIncrementDTO> videoLikeIncrementList);
+    void batchUpdateVideoLikeCount(@Param("list") List<LikeCountIncrementDTO> videoLikeIncrementList);
 }

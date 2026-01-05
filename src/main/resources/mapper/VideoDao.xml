@@ -15,10 +15,15 @@
     </select>
 
     <update id="batchUpdateVideoLikeCount">
-        <foreach collection="list" item="item" separator=";">
-            UPDATE video
-            SET like_count = like_count + #{item.totalIncrement}
-            WHERE video_id = #{item.videoId}
+        UPDATE video
+        SET like_count = CASE
+        <foreach collection="list" item="item" separator="">
+            WHEN id = #{item.id} THEN like_count + #{item.totalIncrement}
+        </foreach>
+        END
+        WHERE id IN
+        <foreach collection="list" item="item" open="(" separator="," close=")">
+            #{item.id}
         </foreach>
     </update>
         </mapper>

@@ -25,7 +25,7 @@ public class LikeTask extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext jobExecutionContext) throws JobExecutionException {
         //将 Redis 里的点赞信息同步到数据库里
-//        userRelationService.transLikedFromRedis2DB();
-//        userRelationService.transLikedCountFromRedis2DB();
+        log.info("定时任务：将redis的点赞信息同步到数据库");
+        interationService.likeToMysql();
     }
 }

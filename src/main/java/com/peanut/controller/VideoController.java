@@ -143,9 +143,9 @@ public class VideoController {
 
     @GetMapping("/popular")
     public Resp<POJOList<Video>> rankingList(PageQueryDTO pageQueryDTO,
-                                             @CurrentUserId String userId) {
-        // todo 异步写入mysql
+                                             @CurrentUserId(required = false) String userId) {
         POJOList<Video> videoPOJOList = videoService.rankingList(pageQueryDTO);
+        logger.info(userId + "：查看排行榜成功");
         return Resp.success(videoPOJOList);
     }
 
