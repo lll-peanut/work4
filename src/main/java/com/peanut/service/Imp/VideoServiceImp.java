@@ -7,13 +7,10 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
 import com.peanut.Dao.UserDao;
 import com.peanut.Dao.VideoDao;
-import com.peanut.POJO.AsyncTaskResult;
+import com.peanut.POJO.*;
 import com.peanut.POJO.DTO.PageQueryDTO;
 import com.peanut.POJO.DTO.VideoPostDTO;
 import com.peanut.POJO.DTO.VideoSearchDTO;
-import com.peanut.POJO.POJOList;
-import com.peanut.POJO.User;
-import com.peanut.POJO.Video;
 import com.peanut.expection.BusinessException;
 import com.peanut.expection.SystemException;
 import com.peanut.service.VideoService;
@@ -63,6 +60,9 @@ public class VideoServiceImp implements VideoService {
 
     @Value("${base.path}")
     private String basePath;
+
+    @Value("${param.homepage.video.size}")
+    private int homepageVideoSize;
 
     private static final String COVER_FOLDER = "/file/cover/upload/";
     private static final String VIDEO_FOLDER = "/file/video/upload/";
@@ -419,5 +419,12 @@ public class VideoServiceImp implements VideoService {
         // 6. （可选）设置Hash和ZSet的过期时间（比如90天）
         redisTemplate.expire(zSetKey, 90, TimeUnit.DAYS);
         redisTemplate.expire(zSetMember, 90, TimeUnit.DAYS);
+    }
+
+    @Override
+    public List<Video> getVideos(String latestTime, String userId) {
+        List<Video> videos = videoDao.selectHomePageVideo(latestTime, homepageVideoSize);
+        log.info("{} 获取首页视频成功", userId);
+        return videos;
     }
 }

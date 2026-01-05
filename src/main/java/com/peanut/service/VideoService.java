@@ -32,4 +32,6 @@ public interface VideoService {
     List<Video> getVideoList(List<String> ids);
 
     POJOList<Video> rankingList(PageQueryDTO pageQueryDTO);
+
+    List<Video> getVideos(String lasestTime, String userId);
 }

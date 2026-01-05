@@ -1,9 +1,13 @@
 package com.peanut.utils;
 
+import com.peanut.security.LoginUser;
+import com.peanut.service.UserService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +29,7 @@ public class JwtUtil {
     @Value("${jwt.refresh.expiration:604800000}") // 7天（604800000 毫秒）
     private long refreshExpiration;
 
+
     // 生成签名密钥（JWT 必须用密钥签名，防止篡改）
     private SecretKey getSecretKey() {
         return Keys.hmacShaKeyFor(secret.getBytes());
@@ -37,10 +42,13 @@ public class JwtUtil {
     /**
      * 1. 生成 Token（登录/注册成功后调用）
      */
-    public String generateToken(UserDetails userDetails) {
+    public String generateToken(LoginUser userDetails) {
+        String username = userDetails.getUsername();
+        String userId = userDetails.getUserId();
         return Jwts.builder()
                 .setSubject(userDetails.getUsername()) // Token 主题：存储用户名（也可存用户 ID）
                 .claim("roles", userDetails.getAuthorities()) // 附加角色/权限信息
+                .claim("id", userId)
                 .setIssuedAt(new Date()) // 签发时间
                 .setExpiration(new Date(System.currentTimeMillis() + expiration)) // 过期时间
                 .signWith(getSecretKey()) // 用密钥签名
@@ -50,7 +58,7 @@ public class JwtUtil {
     /**
      * 2. 验证 Token 有效性（核心：签名是否正确 + 是否过期 + 用户名匹配）
      */
-    public boolean validateToken(String token, UserDetails userDetails) {
+    public boolean validateToken(String token, LoginUser userDetails) {
         String username = extractUsername(token);
         // 校验逻辑：用户名一致 + Token 未过期
         return username.equals(userDetails.getUsername()) && !isTokenExpired(token);
@@ -61,6 +69,10 @@ public class JwtUtil {
      */
     public String extractUsername(String token) {
         return extractClaims(token).getSubject();
+    }
+
+    public String extractUserId(String token) {
+        return extractClaims(token).get("id", String.class);
     }
 
     /**

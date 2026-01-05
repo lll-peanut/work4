@@ -7,7 +7,7 @@ server:
 spring:
   datasource:
     driver-class-name: com.mysql.cj.jdbc.Driver
-    url: jdbc:mysql://localhost:3306/web?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowMultiQueries=false&useSSL=false&rewriteBatchedStatements=true
+    url: jdbc:mysql://localhost:3306/web?useUnicode=true&characterEncoding=utf8&serverTimezone=Asia/Shanghai&allowMultiQueries=false&useSSL=false&allowPublicKeyRetrieval=true&rewriteBatchedStatements=true
     username: root
     password: 123456
   servlet:
@@ -25,6 +25,12 @@ spring:
           max-idle: 8
           min-idle: 0
           max-wait: 1000ms
+  rabbitmq:
+    host: 127.0.0.1  # 主机名
+    port: 5672  # 端口
+    virtual-host: /  # 虚拟主机
+    username: root  # 用户名
+    password: 123456  # 密码
 logging:
   level:
    com.pineapplesystem.PineappleSystemApplicationTests: debug
@@ -64,3 +70,8 @@ thread:
     max-size: 16
     keep-alive-seconds: 60                         # 非核心线程空闲超时时间
     queue-capacity: 100                            # 队列容量
+
+param:
+  homepage:
+    video:
+      size: 10

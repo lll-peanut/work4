@@ -1,25 +1,32 @@
 package com.peanut.controller;
 
 import com.peanut.POJO.*;
+import com.peanut.POJO.DTO.MFABindDTO;
+import com.peanut.POJO.VO.MfaQrCodeVO;
 import com.peanut.annotation.CurrentUserId;
 import com.peanut.annotation.RedisLimitOnClassAnnotation;
 import com.peanut.annotation.SystemLog;
 import com.peanut.apsect.SystemLogAspect;
 import com.peanut.service.UserService;
+import com.peanut.utils.MFATOTPUtil;
 import org.apache.ibatis.jdbc.Null;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.time.Duration;
 
 /**
  * 用户控制器
  * 功能： 注册， 上传头像， 获取用户信息
+ *
  * @author: peanut
  * @date: 2025/12/18
  * @version:1.0
  */
+
 @RestController()
 @RequestMapping("/user")
 @RedisLimitOnClassAnnotation
@@ -27,10 +34,16 @@ public class UserController {
 
     private static final Logger logger = LoggerFactory.getLogger(SystemLogAspect.class);
 
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+
+    // 使用构造函数注入
+    public UserController(UserService userService) {
+        this.userService = userService;
+    }
+
     /**
      * 作用： 注册用户
+     *
      * @param username
      * @param password
      * @return
@@ -45,6 +58,7 @@ public class UserController {
 
     /**
      * 作用： 通过id寻找用户
+     *
      * @param id
      * @return
      */
@@ -58,6 +72,7 @@ public class UserController {
 
     /**
      * 上传用户头像
+     *
      * @param data
      * @param id
      * @return
@@ -69,5 +84,13 @@ public class UserController {
         logger.info(id + ": 上传头像成功,头像地址: " + url);
         return Resp.success(user);
     }
+
+    @PostMapping("/image/search")
+    public Resp<String> imageSearch(@RequestParam MultipartFile data, @CurrentUserId String id) {
+        String url = userService.imageSearch(data, id);
+        logger.info("{}: 以图搜图成功, 返回: {}", id, url);
+        return Resp.success(url);
+    }
+
 
 }

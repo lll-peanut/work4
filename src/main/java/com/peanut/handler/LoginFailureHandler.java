@@ -30,6 +30,8 @@ public class LoginFailureHandler implements AuthenticationFailureHandler {
         // 1. 设置响应格式（JSON + UTF-8，避免中文乱码）
         response.setContentType("application/json;charset=UTF-8");
         PrintWriter out = response.getWriter();
+        System.out.println("登录失败原因：" + exception.getClass().getName());
+        System.out.println("登录失败信息：" + exception.getMessage());
 
         logger.info("帐号或密码错误，登录失败");
         // 4. 构建统一返回格式 Resp

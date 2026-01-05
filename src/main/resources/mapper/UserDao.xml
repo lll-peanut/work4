@@ -11,4 +11,9 @@
         </foreach>
         LIMIT 2
     </select>
+    <update id="updateMFASecret">
+        UPDATE user
+        SET mfa_secret = #{secret}
+        WHERE id = #{userId}
+    </update>
 </mapper>

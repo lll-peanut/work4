@@ -3,13 +3,17 @@ package com.peanut.config;
 import com.peanut.common.filter.JwtAuthenticationFilter;
 import com.peanut.handler.LoginFailureHandler;
 import com.peanut.handler.LoginSuccessHandler;
+import com.peanut.security.service.Imp.UserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
+import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -37,6 +41,10 @@ public class DefaultSecurityConfig {
     @Autowired
     private LoginFailureHandler loginFailureHandler;
 
+    @Lazy
+    @Autowired
+    private UserDetailService userDetailsService;
+
     @Bean
     public PasswordEncoder passwordEncoder() {
         return new BCryptPasswordEncoder();
@@ -47,6 +55,8 @@ public class DefaultSecurityConfig {
     DefaultAuthenticationEventPublisher defaultAuthenticationEventPublisher(ApplicationEventPublisher delegate) {
         return new DefaultAuthenticationEventPublisher(delegate);
     }
+
+
 
     //需要放行的页面
     private static final String[] PERMIT_ALL_PATHS = {
@@ -61,6 +71,14 @@ public class DefaultSecurityConfig {
             "/following/list",      // 根据 user_id 查看指定人的关注列表
             "/follower/list",       // 根据 user_id 查看指定人的粉丝列表
     };
+
+    @Bean
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(userDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
+    }
 
     // 核心：配置登录行为，指定你的自定义 /login 页 并且放行页面
     @Bean

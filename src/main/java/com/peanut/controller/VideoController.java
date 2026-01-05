@@ -10,6 +10,7 @@ import com.peanut.annotation.RedisLimitOnClassAnnotation;
 import com.peanut.expection.BusinessException;
 import com.peanut.service.UserService;
 import com.peanut.service.VideoService;
+import com.peanut.utils.DateTimeFormatsUtil;
 import com.peanut.utils.FilePersistenceUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -18,7 +19,9 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
+import java.time.Instant;
 import java.time.LocalDateTime;
+import java.time.ZoneId;
 import java.util.Arrays;
 import java.util.List;
 import java.util.UUID;
@@ -143,14 +146,23 @@ public class VideoController {
 
     @GetMapping("/popular")
     public Resp<POJOList<Video>> rankingList(PageQueryDTO pageQueryDTO,
-                                             @CurrentUserId String userId) {
-        // todo 异步写入mysql
+                                             @CurrentUserId(required = false) String userId) {
         POJOList<Video> videoPOJOList = videoService.rankingList(pageQueryDTO);
+        logger.info(userId + "：查看排行榜成功");
         return Resp.success(videoPOJOList);
     }
 
-    @GetMapping("/feed")
-    public Resp<POJOList<Video>> videoStream(@RequestParam(value = "latest_time") String latestTime) {
-        return null;
+    @GetMapping("/feed/")
+    public Resp<List<Video>> videoStream(@RequestParam(value = "latest_time", required = false) String latestTime,
+                                             @CurrentUserId(required = false) String userId) {
+        String time = null;
+        if (latestTime != null) {
+            Long s = Long.parseLong(latestTime);
+            time = DateTimeFormatsUtil
+                    .getFormatterWithZone()
+                    .format(Instant.ofEpochMilli(s));
+        }
+        List<Video> videos = videoService.getVideos(time, userId);
+        return Resp.success(videos);
     }
 }

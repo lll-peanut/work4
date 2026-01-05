@@ -5,6 +5,7 @@ import com.alibaba.fastjson.serializer.SerializerFeature;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.peanut.POJO.Resp;
 import com.peanut.POJO.User;
+import com.peanut.security.LoginUser;
 import com.peanut.service.UserService;
 import com.peanut.utils.JwtUtil;
 import jakarta.servlet.ServletException;
@@ -45,10 +46,10 @@ public class LoginSuccessHandler implements AuthenticationSuccessHandler {
         try(PrintWriter out = response.getWriter()) {
 
             // 2. 从 Authentication 中获取登录成功的用户信息（UserDetails）
-            UserDetails userDetails = (UserDetails) authentication.getPrincipal();
-            String username = userDetails.getUsername(); // 登录用户名
-            String accessToken = jwtUtil.generateToken(userDetails);
-            String refreshToken = jwtUtil.generateRefreshToken(userDetails); // 7天过期
+            LoginUser loginUser = (LoginUser) authentication.getPrincipal();
+            String username = loginUser.getUsername(); // 登录用户名
+            String accessToken = jwtUtil.generateToken(loginUser);
+            String refreshToken = jwtUtil.generateRefreshToken(loginUser); // 7天过期
 
             // 2. 关键：双 Token 放在响应头（不破坏响应体）
             response.setHeader("X-Access-Token", accessToken); // Access Token

@@ -3,6 +3,8 @@ package com.peanut.controller;
 import com.alibaba.fastjson.JSON;
 import com.peanut.POJO.Base;
 import com.peanut.POJO.Resp;
+import com.peanut.security.LoginUser;
+import com.peanut.security.service.Imp.UserDetailService;
 import com.peanut.service.UserService;
 import com.peanut.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,7 +29,7 @@ public class TokenRefreshController {
     private JwtUtil jwtUtil;
 
     @Autowired
-    private UserDetailsService userDetailsService;
+    private UserDetailService userDetailsService;
 
     /**
      * 刷新 Access Token 接口
@@ -45,7 +47,7 @@ public class TokenRefreshController {
             String username = jwtUtil.extractRefreshUsername(refreshToken);
 
             // 3. 查询用户信息
-            UserDetails userDetails = userDetailsService.loadUserByUsername(username);
+            LoginUser userDetails = userDetailsService.loadUserByUsername(username);
 
             // 4. 验证 Refresh Token 有效性（签名 + 未过期）
             if (!jwtUtil.validateRefreshToken(refreshToken, userDetails)) {

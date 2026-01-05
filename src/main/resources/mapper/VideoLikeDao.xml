@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.peanut.Dao.VideoDao">
+<mapper namespace="com.peanut.Dao.VideoLikeDao">
     <insert id="batchSaveOrUpdateVideoLike" parameterType="java.util.List">
         INSERT INTO video_like (id, video_id, user_id, is_cancel)
         VALUES

@@ -1,19 +1,26 @@
 package com.peanut.service.Imp;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.peanut.Dao.ImageDao;
 import com.peanut.Dao.UserDao;
+import com.peanut.POJO.Base;
+import com.peanut.POJO.DTO.MFABindDTO;
+import com.peanut.POJO.Resp;
 import com.peanut.POJO.User;
 import com.peanut.expection.BusinessException;
 import com.peanut.expection.SystemException;
 import com.peanut.service.UserService;
 import com.peanut.utils.FileUtil;
+import com.peanut.utils.MFATOTPUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.security.MessageDigest;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
@@ -25,6 +32,12 @@ public class UserServiceImp implements UserService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private StringRedisTemplate stringRedisTemplate;
+
+    @Autowired
+    private ImageDao imageDao;
 
     @Value("${file.avator.upload.path}")
     private String avatorPath;
@@ -87,6 +100,7 @@ public class UserServiceImp implements UserService {
     /**
      * 作用： 上传用户头像
      * 主要功能： 验证文件是否存在合规，将头像保存在本地，并将路径插入到数据库中
+     *
      * @param file
      * @param user
      * @return
@@ -140,6 +154,68 @@ public class UserServiceImp implements UserService {
     public void validateId(String userId) {
         if (userDao.selectById(userId) == null) {
             throw new BusinessException("User doesn't exist");
+        }
+    }
+
+    @Override
+    public void bindMfaSecret(String userId, MFABindDTO mfaBindDTO) {
+        String code = mfaBindDTO.getCode();
+        String secret = mfaBindDTO.getSecret();
+        String redisKey = "mfa:bind:secret:" + userId;
+
+        // 1) 从 Redis 取出绑定期 secret（获取二维码时写入）
+        String cachedSecret = stringRedisTemplate.opsForValue().get(redisKey);
+        if (cachedSecret == null || cachedSecret.isBlank()) {
+            throw new BusinessException("MFA 绑定已过期，请重新获取二维码");
+        }
+
+        // 3) 用自写 TOTP 工具校验 code（允许时间窗容错由 Util 决定）
+        boolean ok = MFATOTPUtil.verifyCode(cachedSecret, code);
+        if (!ok) {
+            throw new BusinessException("验证码错误");
+        }
+
+        // 4) 绑定：把 secret 入库
+        userDao.updateMFASecret(userId, secret);
+
+        // 5) 删除 Redis 绑定期 secret，避免重放
+        stringRedisTemplate.delete(redisKey);
+    }
+
+    @Override
+    public String imageSearch(MultipartFile data, String userId) {
+        if (data == null || data.isEmpty()) {
+            throw new IllegalArgumentException("图片数据不能为空");
+        }
+
+        String md5 = md5Hex(data);
+
+        // 这里示例：按 hash 精确匹配一条图片 URL
+        // 你也可以改成：返回相似度最高的一条、或返回列表
+        String url = imageDao.findUrlByMd5(md5);
+        if (url == null || url.isBlank()) {
+            // 没搜到的兜底策略：返回空或固定提示图，看你接口约定
+            return "";
+        }
+        return url;
+    }
+
+    private static String md5Hex(MultipartFile file) {
+        try (InputStream in = file.getInputStream()) {
+            MessageDigest md = MessageDigest.getInstance("MD5");
+            byte[] buf = new byte[8192];
+            int n;
+            while ((n = in.read(buf)) > 0) {
+                md.update(buf, 0, n);
+            }
+            byte[] digest = md.digest();
+            StringBuilder sb = new StringBuilder(digest.length * 2);
+            for (byte b : digest) {
+                sb.append(String.format("%02x", b));
+            }
+            return sb.toString();
+        } catch (Exception e) {
+            throw new RuntimeException("计算图片特征失败", e);
         }
     }
 }

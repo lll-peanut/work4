@@ -40,9 +40,9 @@
             <pattern>${pattern}</pattern>
         </encoder>
         <!-- 过滤：仅保留WARN、ERROR级别，拒绝INFO/DEBUG/TRACE -->
-        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">
-            <level>WARN</level> <!-- 阈值设为WARN，仅输出WARN及以上级别 -->
-        </filter>
+<!--        <filter class="ch.qos.logback.classic.filter.ThresholdFilter">-->
+<!--            <level>WARN</level> &lt;!&ndash; 阈值设为WARN，仅输出WARN及以上级别 &ndash;&gt;-->
+<!--        </filter>-->
     </appender>
 
     <appender name="ASYNC_FILE" class="ch.qos.logback.classic.AsyncAppender">

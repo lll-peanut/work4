@@ -23,4 +23,6 @@ public interface InterationService {
     void deleteComment(String userId, String videoId, String commentId);
 
     void likeToMysql();
+
+    void commentLikeToMysql();
 }

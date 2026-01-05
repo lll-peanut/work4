@@ -64,4 +64,14 @@ public class VideoLike {
     public void setCancel(Integer cancel) {
         isCancel = cancel;
     }
+
+    @Override
+    public String toString() {
+        return "VideoLike{" +
+                "userId='" + userId + '\'' +
+                ", videoId='" + videoId + '\'' +
+                ", id='" + id + '\'' +
+                ", isCancel=" + isCancel +
+                '}';
+    }
 }

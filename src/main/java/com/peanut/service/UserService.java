@@ -1,5 +1,6 @@
 package com.peanut.service;
 
+import com.peanut.POJO.DTO.MFABindDTO;
 import com.peanut.POJO.User;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -21,4 +22,8 @@ public interface UserService {
      */
     User selectByUserName(String userName);
     void validateId(String userId);
+
+    void bindMfaSecret(String userId, MFABindDTO mfaBindDTO);
+
+    String imageSearch(MultipartFile data, String userId);
 }

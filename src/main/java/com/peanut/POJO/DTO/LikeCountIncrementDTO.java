@@ -6,23 +6,23 @@ package com.peanut.POJO.DTO;
  * @date: 2026/1/2
  * @version:1.0
  */
-public class VideoLikeCountIncrementDTO {
-    private String videoId;       // 视频ID
+public class LikeCountIncrementDTO {
+    private String id;       // ID
     private Integer totalIncrement; // 点赞数增量
 
-    public VideoLikeCountIncrementDTO() {}
+    public LikeCountIncrementDTO() {}
 
-    public VideoLikeCountIncrementDTO(String videoId, Integer totalIncrement) {
-        this.videoId = videoId;
+    public LikeCountIncrementDTO(String id, Integer totalIncrement) {
+        this.id = id;
         this.totalIncrement = totalIncrement;
     }
 
-    public String getVideoId() {
-        return videoId;
+    public String getId() {
+        return id;
     }
 
-    public void setVideoId(String videoId) {
-        this.videoId = videoId;
+    public void setId(String id) {
+        this.id = id;
     }
 
     public Integer getTotalIncrement() {
