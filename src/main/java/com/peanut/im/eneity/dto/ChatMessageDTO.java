@@ -1,5 +1,6 @@
 package com.peanut.im.eneity.dto;
 
+import com.peanut.im.enumPackage.ConversationType;
 import com.peanut.im.enumPackage.MessageType;
 import com.peanut.im.enumPackage.TargetType;
 
@@ -11,6 +12,7 @@ import com.peanut.im.enumPackage.TargetType;
  * 消息发送请求DTO，包含消息内容、目标用户ID、消息类型和投递目标类型等信息，用于客户端向服务器发送消息请求。
  */
 public class ChatSendRequest {
+
     /**
      * 单发时的目标用户ID；广播时可为空
      */
@@ -34,7 +36,12 @@ public class ChatSendRequest {
     /**
      * 投递目标类型：SINGLE / BROADCAST
      */
-    private TargetType targetType;
+    private ConversationType conversationType;
+
+    /**
+     * 会话ID（单发时可选，广播时必填），用于指定消息发送的会话上下文，确保消息正确路由和存储。
+     */
+    private String conversationId;
 
     public String getToUserId() { return toUserId; }
     public void setToUserId(String toUserId) { this.toUserId = toUserId; }
@@ -48,6 +55,19 @@ public class ChatSendRequest {
     public MessageType getMsgType() { return msgType; }
     public void setMsgType(MessageType msgType) { this.msgType = msgType; }
 
-    public TargetType getTargetType() { return targetType; }
-    public void setTargetType(TargetType targetType) { this.targetType = targetType; }
+    public ConversationType getConversationType() {
+        return conversationType;
+    }
+
+    public void setConversationType(ConversationType conversationType) {
+        this.conversationType = conversationType;
+    }
+
+    public String getConversationId() {
+        return conversationId;
+    }
+
+    public void setConversationId(String conversationId) {
+        this.conversationId = conversationId;
+    }
 }

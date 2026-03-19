@@ -6,7 +6,7 @@ import com.peanut.POJO.Message;
 import com.peanut.config.SpringContextHolder;
 import com.peanut.im.eneity.dto.ChatAck;
 import com.peanut.im.eneity.dto.ChatEnvelope;
-import com.peanut.im.eneity.dto.ChatSendRequest;
+import com.peanut.im.eneity.dto.ChatMessageDTO;
 import com.peanut.im.mq.ImMqConfig;
 import com.peanut.im.util.ConversationIds;
 import jakarta.websocket.*;
@@ -58,9 +58,9 @@ public class GroupSocketServer {
         Message msgObj = null;
         String fromUserId = (String) session.getUserProperties().get("userId");
         if (fromUserId == null) return;
-        ChatSendRequest req;
+        ChatMessageDTO req;
 
-        req = JSON.parseObject(message, ChatSendRequest.class);
+        req = JSON.parseObject(message, ChatMessageDTO.class);
         if (req == null || req.getToUserId() == null || req.getContent() == null) return;
         String msgId = UUID.randomUUID().toString().replace("-", "");
         ChatEnvelope envelope = new ChatEnvelope();
