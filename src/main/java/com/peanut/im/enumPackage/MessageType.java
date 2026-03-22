@@ -8,6 +8,14 @@ package com.peanut.im.enumPackage;
  * 区分消息类型有助于服务器处理不同来源和性质的消息，并为客户端提供适当的展示和交互方式。
  */
 public enum MessageType {
-    USER,    // 用户消息
-    SYSTEM   // 系统消息
+    TEXT(1), IMAGE(2), VIDEO(3), FILE(4);
+    private final int value;
+    MessageType(int value) { this.value = value; }
+    public int getValue() { return value; }
+    public static MessageType fromValue(int value) {
+        for (MessageType t : values()) {
+            if (t.value == value) return t;
+        }
+        throw new IllegalArgumentException("未知MessageType值: " + value);
+    }
 }

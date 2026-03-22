@@ -1,8 +1,7 @@
 package com.peanut.service.Imp;
 
-import com.peanut.Dao.CommentDao;
+import com.peanut.dao.CommentDao;
 import com.peanut.POJO.Comment;
-import com.peanut.POJO.Video;
 import com.peanut.service.CommentService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;

@@ -1,16 +1,13 @@
 package com.peanut.service.Imp;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
-import com.peanut.Dao.ImageDao;
-import com.peanut.Dao.UserDao;
-import com.peanut.POJO.Base;
+import com.peanut.dao.ImageDao;
+import com.peanut.dao.UserDao;
 import com.peanut.POJO.DTO.MFABindDTO;
-import com.peanut.POJO.Resp;
 import com.peanut.POJO.User;
 import com.peanut.expection.BusinessException;
 import com.peanut.expection.SystemException;
 import com.peanut.service.UserService;
-import com.peanut.utils.FileUtil;
 import com.peanut.utils.MFATOTPUtil;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;

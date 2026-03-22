@@ -1,8 +1,8 @@
 package com.peanut.service.Imp;
 
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import com.peanut.Dao.UserDao;
-import com.peanut.Dao.UserRelationDao;
+import com.peanut.dao.UserDao;
+import com.peanut.dao.UserRelationDao;
 import com.peanut.POJO.DTO.PageQueryDTO;
 import com.peanut.POJO.DTO.RelationActionDTO;
 import com.peanut.POJO.DTO.UserPageQueryDTO;

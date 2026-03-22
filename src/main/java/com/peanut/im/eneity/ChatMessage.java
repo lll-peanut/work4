@@ -1,5 +1,8 @@
 package com.peanut.im.eneity;
 
+import com.peanut.im.enumPackage.ConversationType;
+import com.peanut.im.enumPackage.MessageType;
+
 import java.time.LocalDateTime;
 
 /**
@@ -10,7 +13,22 @@ import java.time.LocalDateTime;
 
 public class ChatMessage {
 
-    private String id;
+    public ChatMessage(String msgId, String clientMsgId, String conversationId, String fromUserId, String toTargetId, LocalDateTime serverTime, String content, MessageType msgType, Long sequence, ConversationType conversationType) {
+        this.msgId = msgId;
+        this.clientMsgId = clientMsgId;
+        this.conversationId = conversationId;
+        this.fromUserId = fromUserId;
+        this.toTargetId = toTargetId;
+        this.serverTime = serverTime;
+        this.content = content;
+        this.msgType = msgType;
+        this.sequence = sequence;
+        this.conversationType = conversationType;
+    }
+
+    public ChatMessage() {}
+
+    private String msgId;
 
     private String clientMsgId;
 
@@ -18,40 +36,24 @@ public class ChatMessage {
 
     private String fromUserId;
 
-    private String toUserId;
+    private String toTargetId;
 
     private LocalDateTime serverTime;
 
     private String content;
 
-    private Integer msgType;
+    private MessageType msgType;
 
-    private Integer sequence;
+    private Long sequence;
 
-    private Integer conversationType;
+    private ConversationType conversationType;
 
-    public Integer getConversationType() {
-        return conversationType;
+    public String getMsgId() {
+        return msgId;
     }
 
-    public void setConversationType(Integer conversationType) {
-        this.conversationType = conversationType;
-    }
-
-    public Integer getSequence() {
-        return sequence;
-    }
-
-    public void setSequence(Integer sequence) {
-        this.sequence = sequence;
-    }
-
-    public String getId() {
-        return id;
-    }
-
-    public void setId(String id) {
-        this.id = id;
+    public void setMsgId(String msgId) {
+        this.msgId = msgId;
     }
 
     public String getClientMsgId() {
@@ -78,12 +80,12 @@ public class ChatMessage {
         this.fromUserId = fromUserId;
     }
 
-    public String getToUserId() {
-        return toUserId;
+    public String getToTargetId() {
+        return toTargetId;
     }
 
-    public void setToUserId(String toUserId) {
-        this.toUserId = toUserId;
+    public void setToTargetId(String toTargetId) {
+        this.toTargetId = toTargetId;
     }
 
     public LocalDateTime getServerTime() {
@@ -103,10 +105,26 @@ public class ChatMessage {
     }
 
     public Integer getMsgType() {
-        return msgType;
+        return msgType.getValue();
     }
 
-    public void setMsgType(Integer msgType) {
+    public void setMsgType(MessageType msgType) {
         this.msgType = msgType;
+    }
+
+    public Long getSequence() {
+        return sequence;
+    }
+
+    public void setSequence(Long sequence) {
+        this.sequence = sequence;
+    }
+
+    public Integer getConversationType() {
+        return conversationType.getValue();
+    }
+
+    public void setConversationType(ConversationType conversationType) {
+        this.conversationType = conversationType;
     }
 }

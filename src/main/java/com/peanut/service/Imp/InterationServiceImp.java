@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
-import com.peanut.Dao.*;
+import com.peanut.dao.*;
 import com.peanut.POJO.*;
 import com.peanut.POJO.DTO.LikeCountIncrementDTO;
 import com.peanut.expection.BusinessException;

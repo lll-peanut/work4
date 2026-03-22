@@ -75,3 +75,7 @@ param:
   homepage:
     video:
       size: 10
+im:
+  offline:
+    maxCount: 100
+    duration: 7 # 离线消息过期时间，单位：天

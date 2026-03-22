@@ -1,7 +1,7 @@
 package com.peanut.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
-import com.peanut.Dao.UserDao;
+import com.peanut.dao.UserDao;
 import com.peanut.POJO.CustomUserDetails;
 import com.peanut.POJO.User;
 import org.springframework.beans.factory.annotation.Autowired;

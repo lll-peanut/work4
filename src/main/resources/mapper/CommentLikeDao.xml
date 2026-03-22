@@ -2,7 +2,7 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.peanut.Dao.CommentLikeDao">
+<mapper namespace="com.peanut.dao.CommentLikeDao">
     <insert id="batchSaveOrUpdateCommentLike" parameterType="java.util.List">
         INSERT INTO comment_like (id, comment_id, user_id, is_cancel)
         VALUES

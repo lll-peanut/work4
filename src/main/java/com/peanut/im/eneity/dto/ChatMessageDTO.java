@@ -2,16 +2,15 @@ package com.peanut.im.eneity.dto;
 
 import com.peanut.im.enumPackage.ConversationType;
 import com.peanut.im.enumPackage.MessageType;
-import com.peanut.im.enumPackage.TargetType;
 
 /**
  *
  * @author: peanut
  * @date: 2026/3/7
  * @version:1.0
- * 消息发送请求DTO，包含消息内容、目标用户ID、消息类型和投递目标类型等信息，用于客户端向服务器发送消息请求。
+ * 消息发送请求DTO，包含消息内容、目标用户ID、客户端消息唯一ID、消息类型和投递目标类型等信息，用于客户端向服务器发送消息请求。
  */
-public class ChatSendRequest {
+public class ChatMessageDTO {
 
     /**
      * 单发时的目标用户ID；广播时可为空
@@ -34,7 +33,7 @@ public class ChatSendRequest {
     private MessageType msgType;
 
     /**
-     * 投递目标类型：SINGLE / BROADCAST
+     * 会话类型：USER / GROUP / SYSTEM
      */
     private ConversationType conversationType;
 
@@ -69,5 +68,17 @@ public class ChatSendRequest {
 
     public void setConversationId(String conversationId) {
         this.conversationId = conversationId;
+    }
+
+    @Override
+    public String toString() {
+        return "ChatMessageDTO{" +
+                "toUserId='" + toUserId + '\'' +
+                ", content='" + content + '\'' +
+                ", clientMsgId='" + clientMsgId + '\'' +
+                ", msgType=" + msgType +
+                ", conversationType=" + conversationType +
+                ", conversationId='" + conversationId + '\'' +
+                '}';
     }
 }
