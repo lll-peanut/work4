@@ -1,22 +1,17 @@
 package com.peanut.controller;
 
-import com.peanut.POJO.*;
-import com.peanut.POJO.DTO.MFABindDTO;
-import com.peanut.POJO.VO.MfaQrCodeVO;
+import com.peanut.POJO.entity.Resp;
+import com.peanut.POJO.entity.User;
 import com.peanut.annotation.CurrentUserId;
 import com.peanut.annotation.RedisLimitOnClassAnnotation;
 import com.peanut.annotation.SystemLog;
 import com.peanut.apsect.SystemLogAspect;
 import com.peanut.service.UserService;
-import com.peanut.utils.MFATOTPUtil;
 import org.apache.ibatis.jdbc.Null;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.time.Duration;
 
 /**
  * 用户控制器

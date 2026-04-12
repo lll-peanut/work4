@@ -1,7 +1,7 @@
 package com.peanut.service;
 
 import com.peanut.POJO.DTO.MFABindDTO;
-import com.peanut.POJO.User;
+import com.peanut.POJO.entity.User;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;

@@ -1,8 +1,8 @@
 package com.peanut.service;
 
-import com.peanut.POJO.Comment;
-import com.peanut.POJO.POJOList;
-import com.peanut.POJO.Video;
+import com.peanut.POJO.entity.Comment;
+import com.peanut.POJO.entity.POJOList;
+import com.peanut.POJO.entity.Video;
 
 import java.util.List;
 

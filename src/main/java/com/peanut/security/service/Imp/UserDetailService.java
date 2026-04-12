@@ -1,6 +1,6 @@
 package com.peanut.security.service.Imp;
 
-import com.peanut.POJO.User;
+import com.peanut.POJO.entity.User;
 import com.peanut.security.LoginUser;
 import com.peanut.service.UserService;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;

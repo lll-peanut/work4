@@ -1,8 +1,8 @@
 package com.peanut.config;
 
 import com.peanut.common.filter.JwtAuthenticationFilter;
-import com.peanut.handler.LoginFailureHandler;
-import com.peanut.handler.LoginSuccessHandler;
+import com.peanut.common.handler.LoginFailureHandler;
+import com.peanut.common.handler.LoginSuccessHandler;
 import com.peanut.security.service.Imp.UserDetailService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.autoconfigure.condition.ConditionalOnMissingBean;
@@ -10,12 +10,15 @@ import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchy;
+import org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl;
 import org.springframework.security.authentication.AuthenticationEventPublisher;
 import org.springframework.security.authentication.AuthenticationProvider;
 import org.springframework.security.authentication.DefaultAuthenticationEventPublisher;
 import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.core.GrantedAuthorityDefaults;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -24,6 +27,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 /**
  * 配置springSecurity
+ *
  * @author: peanut
  * @date: 2025/12/19
  * @version:1.0
@@ -55,7 +59,6 @@ public class DefaultSecurityConfig {
     DefaultAuthenticationEventPublisher defaultAuthenticationEventPublisher(ApplicationEventPublisher delegate) {
         return new DefaultAuthenticationEventPublisher(delegate);
     }
-
 
 
     //需要放行的页面
@@ -105,5 +108,19 @@ public class DefaultSecurityConfig {
                 );
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
         return http.build();
+    }
+
+    @Bean
+    static GrantedAuthorityDefaults grantedAuthorityDefaults() {
+        return new GrantedAuthorityDefaults("ROLE_");
+    }
+
+    @Bean
+    static RoleHierarchy roleHierarchy() {
+        RoleHierarchyImpl roleHierarchy = new RoleHierarchyImpl();
+        roleHierarchy.setHierarchy("""
+                ROLE_ADMIN > ROLE_USER
+                """);
+        return roleHierarchy;
     }
 }

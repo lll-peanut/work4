@@ -17,7 +17,7 @@
     </insert>
 
 
-    <select id="batchQueryByUserAndVideo" resultType="com.peanut.POJO.VideoLike">
+    <select id="batchQueryByUserAndVideo" resultType="com.peanut.POJO.entity.VideoLike">
         SELECT user_id AS userId,video_id as videoId, is_cancel as isCancel
         FROM video_like
         <where>

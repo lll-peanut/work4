@@ -12,7 +12,7 @@
                         AND status = 0) AS exist_flag
     </select>
 
-    <insert id="insertOrUpdateFollow" parameterType="com.peanut.POJO.UserRelation"
+    <insert id="insertOrUpdateFollow" parameterType="com.peanut.POJO.entity.UserRelation"
             useGeneratedKeys="false" keyProperty="id">
         INSERT INTO user_relation (id, user_id, to_user_id, status, created_at, updated_at)
         VALUES (#{id}, #{userId}, #{toUserId}, 0, NOW(), NOW()) ON DUPLICATE KEY
@@ -21,7 +21,7 @@
             status = IF(status = 1, 0, status);
     </insert>
 
-    <update id="insertOrUpdateUnFollow" parameterType="com.peanut.POJO.UserRelation">
+    <update id="insertOrUpdateUnFollow" parameterType="com.peanut.POJO.entity.UserRelation">
         UPDATE user_relation
         SET status     = 1,
             updated_at = NOW()

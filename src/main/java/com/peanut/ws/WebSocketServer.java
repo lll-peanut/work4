@@ -3,33 +3,23 @@ package com.peanut.ws;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONException;
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import com.peanut.POJO.Base;
-import com.peanut.POJO.Message;
-import com.peanut.POJO.Resp;
+import com.peanut.POJO.entity.Base;
+import com.peanut.POJO.entity.Resp;
 import com.peanut.config.SpringContextHolder;
-import com.peanut.im.eneity.ChatMessage;
-import com.peanut.im.eneity.dto.ChatAck;
-import com.peanut.im.eneity.dto.ChatEnvelope;
-import com.peanut.im.eneity.dto.ChatMessageDTO;
-import com.peanut.im.mq.ImMqConfig;
-import com.peanut.im.util.ConversationIds;
+import com.peanut.im.pojo.entity.ChatMessage;
+import com.peanut.im.pojo.dto.ChatAck;
+import com.peanut.im.pojo.dto.ChatMessageDTO;
+import com.peanut.im.mq.ChatProducer;
 import jakarta.websocket.*;
 import jakarta.websocket.server.ServerEndpoint;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.amqp.rabbit.core.RabbitTemplate;
 import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.stereotype.Component;
-import org.springframework.web.socket.TextMessage;
 
 import java.io.IOException;
 import java.time.LocalDateTime;
-import java.util.Map;
-import java.util.Objects;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.stream.Stream;
+
 // todo 这里的value里面的值可以/chat/friend/{friendId}，这样可以直接在路径上拿到friendId，减少一次json解析
 @ServerEndpoint(value = "/chat/friends", configurator = WsHandshakeConfigurator.class)
 @Component
@@ -37,7 +27,7 @@ public class WebSocketServer {
 
     private StringRedisTemplate stringRedisTemplate;
 
-    private RabbitTemplate rabbitTemplate;
+    private ChatProducer chatProducer;
 
     private final static Logger logger = LoggerFactory.getLogger(WebSocketServer.class);
 
@@ -53,7 +43,7 @@ public class WebSocketServer {
         }
         OnlineSessionRegistry.add(userId, session);
         stringRedisTemplate = SpringContextHolder.getBean(StringRedisTemplate.class);
-        rabbitTemplate = SpringContextHolder.getBean(RabbitTemplate.class);
+        chatProducer = SpringContextHolder.getBean(ChatProducer.class);
     }
 
     @OnMessage
@@ -66,7 +56,7 @@ public class WebSocketServer {
             session.getAsyncRemote().sendText(JSON.toJSONString(Resp.fail(new Base(500, "消息格式错误，请检查！"))));
             return;
         }
-        if (chatMessageDTO.getToUserId() == null
+        if (chatMessageDTO.getToTargetId() == null
                 || chatMessageDTO.getContent() == null
                 || chatMessageDTO.getClientMsgId() == null
                 || chatMessageDTO.getMsgType() == null
@@ -85,11 +75,11 @@ public class WebSocketServer {
         }
         String msgId = IdWorker.getIdStr();
         String conversationId = chatMessageDTO.getConversationId();
-        ChatMessage chatMessage = new ChatMessage(msgId, chatMessageDTO.getClientMsgId(), conversationId, fromUserId, chatMessageDTO.getToUserId(),
+        ChatMessage chatMessage = new ChatMessage(msgId, chatMessageDTO.getClientMsgId(), conversationId, fromUserId, chatMessageDTO.getToTargetId(),
                 LocalDateTime.now(), chatMessageDTO.getContent(), chatMessageDTO.getMsgType(),
                 null, chatMessageDTO.getConversationType());
         try {
-            rabbitTemplate.convertAndSend(ImMqConfig.EXCHANGE, ImMqConfig.ROUTING_SINGLE, chatMessage);
+            chatProducer.sendSingleChat(chatMessage);
             session.getAsyncRemote().sendText(JSON.toJSONString(Resp.success(new ChatAck(msgId, chatMessageDTO.getClientMsgId()))));
         } catch (JSONException e) {
             logger.error("消息发送失败:", e);

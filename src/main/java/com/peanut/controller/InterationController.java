@@ -1,6 +1,9 @@
 package com.peanut.controller;
 
-import com.peanut.POJO.*;
+import com.peanut.POJO.entity.Comment;
+import com.peanut.POJO.entity.POJOList;
+import com.peanut.POJO.entity.Resp;
+import com.peanut.POJO.entity.Video;
 import com.peanut.annotation.CurrentUserId;
 import com.peanut.annotation.RedisLimitOnClassAnnotation;
 import com.peanut.expection.BusinessException;

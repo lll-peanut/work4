@@ -3,7 +3,7 @@
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
 <mapper namespace="com.peanut.dao.VideoDao">
-    <select id="selectVideoListById" resultType="com.peanut.POJO.Video">
+    <select id="selectVideoListById" resultType="com.peanut.POJO.entity.Video">
         SELECT `id`, `user_id`, `video_url`,`cover_url`,`title`,`description`,
         `like_count`,`comment_count`,`created_at`,`updated_at`,`deleted_at`
         from `video`
@@ -27,7 +27,7 @@
         </foreach>
     </update>
 
-    <select id="selectHomePageVideo" resultType="com.peanut.POJO.Video">
+    <select id="selectHomePageVideo" resultType="com.peanut.POJO.entity.Video">
         SELECT `id`, `user_id`, `video_url`,`cover_url`,`title`,`description`,
         `like_count`,`comment_count`,`created_at`,`updated_at`,`deleted_at`
         from `video`
@@ -39,5 +39,23 @@
         </where>
         order by updated_at DESC
         limit #{size}
+    </select>
+
+    <update id="updateVideoStatus">
+        update video
+        set status = #{videoStatus}
+        where id = #{videoId}
+    </update>
+
+    <select id="selectVideoPending" resultType="Video">
+        SELECT
+            *
+        FROM
+            video
+        WHERE
+            status = 'pending'
+          AND deleted = 0
+        ORDER BY id DESC
+            LIMIT #{size} OFFSET #{(page - 1) * size}
     </select>
 </mapper>

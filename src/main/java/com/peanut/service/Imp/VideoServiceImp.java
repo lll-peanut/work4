@@ -5,14 +5,18 @@ import com.alibaba.fastjson.JSON;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.baomidou.mybatisplus.extension.plugins.pagination.Page;
+import com.peanut.POJO.entity.AsyncTaskResult;
+import com.peanut.POJO.entity.POJOList;
+import com.peanut.POJO.entity.User;
+import com.peanut.POJO.entity.Video;
 import com.peanut.dao.UserDao;
 import com.peanut.dao.VideoDao;
-import com.peanut.POJO.*;
 import com.peanut.POJO.DTO.PageQueryDTO;
 import com.peanut.POJO.DTO.VideoPostDTO;
 import com.peanut.POJO.DTO.VideoSearchDTO;
 import com.peanut.expection.BusinessException;
 import com.peanut.expection.SystemException;
+import com.peanut.im.enumPackage.VideoStatus;
 import com.peanut.service.VideoService;
 import com.peanut.utils.FilePersistenceUtil;
 import com.peanut.utils.PageUtil;
@@ -71,17 +75,9 @@ public class VideoServiceImp implements VideoService {
 
 
     @Override
-    public Model getVideo(Model model) {
-        File videoDir = new File(VIDEO_FOLDER);
-        File[] videoFiles = videoDir.listFiles((dir, name) -> name.toLowerCase().endsWith(".mp4"));
-        if (videoFiles != null) {
-            List<String> videoList = Arrays.stream(videoFiles)
-                    .map(File::getName)
-                    .toList();
-            model.addAttribute("videos", videoList);
-        }
-
-        return model;
+    public Video getVideo(String videoId) {
+        Video videoById = videoDao.getVideoById(videoId);
+        return videoById;
     }
 
     /**
@@ -423,5 +419,11 @@ public class VideoServiceImp implements VideoService {
         List<Video> videos = videoDao.selectHomePageVideo(latestTime, homepageVideoSize);
         log.info("{} 获取首页视频成功", userId);
         return videos;
+    }
+
+    @Override
+    public void updateVideoStatus(String videoId, VideoStatus videoStatus) {
+        videoDao.updateVideoStatus(videoId, videoStatus);
+        log.info("{} 更新视频状态成功 | videoId: {} | videoStatus: {}", videoId, videoId, videoStatus);
     }
 }

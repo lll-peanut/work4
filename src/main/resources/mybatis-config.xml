@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE configuration
+        PUBLIC "-//mybatis.org//DTD Config 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-config.dtd">
+<configuration>
+    <typeHandlers>
+        <!-- 注册你所有需要枚举自动映射的 handler -->
+        <typeHandler handler="com.peanut.common.handler.CodeEnumTypeHandler"
+                     javaType="com.peanut.enumPackage.CodeDescEnum"/>
+        <!-- 多个枚举就多写几行 typeHandler -->
+    </typeHandlers>
+</configuration>

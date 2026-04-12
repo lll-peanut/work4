@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peanut.dao.VideoReviewLogDao">
+    <insert id="insertVideoReview" parameterType="VideoReviewLog">
+        INSERT INTO video_review_log (
+        id,
+        video_id,
+        reviewer_id,
+        created_at,
+        decision,
+        reason
+        )
+        VALUES (
+        #{id},
+        #{videoId},
+        #{reviewerId},
+        #{createdAt},
+        #{decision},
+        #{reason}
+        )
+    </insert>
+
+</mapper>

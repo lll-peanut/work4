@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peanut.im.dao.ChatMessageDao">
+
+    <select id="findByMsgIdDesc" resultType="com.peanut.im.pojo.entity.ChatMessage">
+        SELECT msg_id, client_msg_id, conversation_id, from_user_id, to_target_id, server_time,
+               content, msg_type, sequence, conversation_type
+        from `chat_message`
+        WHERE msg_id IN
+        <foreach collection="msgIds" item="id" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+        LIMIT #{size}
+    </select>
+
+    <select id="findHistory" resultType="com.peanut.im.pojo.entity.ChatMessage">
+        SELECT
+        msg_id, client_msg_id, conversation_id, from_user_id, to_target_id, server_time, content,
+        msg_type, sequence, conversation_type
+        FROM chat_message
+        WHERE 1=1
+        <if test="dto.conversationId != null and dto.conversationId != ''">
+            AND conversation_id = #{dto.conversationId}
+        </if>
+        <if test="dto.messageType != null">
+            AND msg_type = #{dto.messageType}
+        </if>
+        <if test="dto.conversationType != null">
+            AND conversation_type = #{dto.conversationType}
+        </if>
+        <if test="dto.fromDate != null">
+            AND server_time &gt;= FROM_UNIXTIME(#{dto.fromDate} /1000)
+        </if>
+        <if test="dto.toDate != null">
+            AND server_time &lt;= FROM_UNIXTIME(#{dto.toDate}/1000)
+        </if>
+        ORDER BY sequence DESC
+        <if test="size != null">
+            LIMIT #{size}
+        </if>
+    </select>
+</mapper>

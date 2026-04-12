@@ -17,7 +17,7 @@
     </insert>
 
 
-    <select id="batchQueryByUserAndComment" resultType="com.peanut.POJO.CommentLike">
+    <select id="batchQueryByUserAndComment" resultType="com.peanut.POJO.entity.CommentLike">
         SELECT user_id AS userId,comment_id as commentId, is_cancel as isCancel
         FROM comment_like
         <where>

@@ -2,8 +2,8 @@ package com.peanut.service;
 
 import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.peanut.dao.UserDao;
-import com.peanut.POJO.CustomUserDetails;
-import com.peanut.POJO.User;
+import com.peanut.POJO.entity.CustomUserDetails;
+import com.peanut.POJO.entity.User;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.userdetails.UserDetails;

@@ -1,15 +1,12 @@
 package com.peanut.controller;
 
 import com.alibaba.fastjson.JSON;
-import com.peanut.POJO.Base;
-import com.peanut.POJO.Resp;
+import com.peanut.POJO.entity.Base;
+import com.peanut.POJO.entity.Resp;
 import com.peanut.security.LoginUser;
 import com.peanut.security.service.Imp.UserDetailService;
-import com.peanut.service.UserService;
 import com.peanut.utils.JwtUtil;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.userdetails.UserDetails;
-import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestHeader;
 import org.springframework.web.bind.annotation.RequestMapping;

@@ -40,11 +40,12 @@ mybatis-plus:
 #      logic-not-delete-value: 0
 #      logic-delete-value: 1
 #      meta-object-handler: none
-
+ type-handlers-package: com.peanut.common.handler
  configuration:
-  map-underscore-to-camel-case=: true
-#    log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
-
+  map-underscore-to-camel-case: true
+#  log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+mybatis:
+  config-location: classpath:mybatis-config.xml
 jwt:
   # Access Token：30分钟过期
   access:
@@ -79,3 +80,5 @@ im:
   offline:
     maxCount: 100
     duration: 7 # 离线消息过期时间，单位：天
+  history:
+    size: 20 # 历史消息查询数量

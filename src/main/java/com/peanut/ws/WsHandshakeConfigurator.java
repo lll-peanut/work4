@@ -1,11 +1,7 @@
 package com.peanut.ws;
 
-import com.peanut.POJO.User;
 import com.peanut.config.SpringContextHolder;
-import com.peanut.service.UserService;
 import com.peanut.utils.JwtUtil;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jwts;
 import jakarta.websocket.HandshakeResponse;
 import jakarta.websocket.server.HandshakeRequest;
 import jakarta.websocket.server.ServerEndpointConfig;

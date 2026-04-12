@@ -1,7 +1,9 @@
 package com.peanut.im.service;
 
-import com.peanut.im.eneity.ChatMessage;
-import org.springframework.stereotype.Service;
+import com.peanut.im.pojo.dto.MessageSearchDTO;
+import com.peanut.im.pojo.entity.ChatMessage;
+
+import java.util.List;
 
 /**
  * @author: peanut
@@ -12,4 +14,6 @@ import org.springframework.stereotype.Service;
 public interface ChatMessageService {
 
     public void saveIdempotent(ChatMessage msg);
+
+    public List<ChatMessage> getLatestMessages(MessageSearchDTO messageSearchDTO);
 }

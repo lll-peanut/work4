@@ -1,6 +1,6 @@
 package com.peanut.im.service.Impl;
 
-import com.peanut.im.eneity.ChatMessage;
+import com.peanut.im.pojo.entity.ChatMessage;
 import com.peanut.im.service.ConvMetaService;
 import org.springframework.stereotype.Service;
 

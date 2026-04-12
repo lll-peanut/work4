@@ -1,6 +1,6 @@
 package com.peanut.common.resolve;
 
-import com.peanut.POJO.User;
+import com.peanut.POJO.entity.User;
 import com.peanut.annotation.CurrentUserId;
 import com.peanut.service.UserService;
 import org.slf4j.Logger;

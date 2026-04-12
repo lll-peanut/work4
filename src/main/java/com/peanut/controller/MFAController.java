@@ -1,7 +1,7 @@
 package com.peanut.controller;
 
 import com.peanut.POJO.DTO.MFABindDTO;
-import com.peanut.POJO.Resp;
+import com.peanut.POJO.entity.Resp;
 import com.peanut.POJO.VO.MfaQrCodeVO;
 import com.peanut.annotation.CurrentUserId;
 import com.peanut.annotation.RedisLimitOnClassAnnotation;

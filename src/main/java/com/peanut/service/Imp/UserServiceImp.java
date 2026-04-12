@@ -4,7 +4,7 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.peanut.dao.ImageDao;
 import com.peanut.dao.UserDao;
 import com.peanut.POJO.DTO.MFABindDTO;
-import com.peanut.POJO.User;
+import com.peanut.POJO.entity.User;
 import com.peanut.expection.BusinessException;
 import com.peanut.expection.SystemException;
 import com.peanut.service.UserService;

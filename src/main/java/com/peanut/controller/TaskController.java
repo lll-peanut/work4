@@ -2,15 +2,13 @@ package com.peanut.controller;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.TypeReference;
-import com.peanut.POJO.AsyncTaskResult;
-import com.peanut.POJO.Base;
-import com.peanut.POJO.Resp;
+import com.peanut.POJO.entity.AsyncTaskResult;
+import com.peanut.POJO.entity.Base;
+import com.peanut.POJO.entity.Resp;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 /**

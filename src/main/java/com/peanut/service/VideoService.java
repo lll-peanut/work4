@@ -4,16 +4,15 @@ import com.baomidou.mybatisplus.core.metadata.IPage;
 import com.peanut.POJO.DTO.PageQueryDTO;
 import com.peanut.POJO.DTO.VideoPostDTO;
 import com.peanut.POJO.DTO.VideoSearchDTO;
-import com.peanut.POJO.POJOList;
-import com.peanut.POJO.Video;
+import com.peanut.POJO.entity.POJOList;
+import com.peanut.POJO.entity.Video;
+import com.peanut.im.enumPackage.VideoStatus;
 import org.springframework.ui.Model;
-import org.springframework.validation.annotation.Validated;
-import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
 public interface VideoService {
-    Model getVideo(Model model);
+    Video getVideo(String videoId);
 
     String postVideo(String file);
 
@@ -34,4 +33,6 @@ public interface VideoService {
     POJOList<Video> rankingList(PageQueryDTO pageQueryDTO);
 
     List<Video> getVideos(String lasestTime, String userId);
+
+    void updateVideoStatus(String videoId, VideoStatus videoStatus);
 }
