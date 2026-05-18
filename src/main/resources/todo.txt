@@ -1,0 +1,58 @@
+1. 需要把上传视频给管理员审核，要上传预览的后面写
+
+  └── peanut
+      ├── annotation
+      ├── apsect
+      ├── common
+      │   ├── deserializer
+      │   ├── filter
+      │   ├── handler
+      │   ├── listener
+      │   ├── resolve
+      │   └── task
+      ├── config
+      ├── constant
+      ├── controller
+      ├── dao
+      ├── enumPackage
+      ├── expection
+      ├── im
+      │   ├── controller
+      │   ├── dao
+      │   ├── enumPackage
+      │   ├── handler
+      │   ├── mq
+      │   ├── pojo
+      │   │   ├── DO
+      │   │   ├── dto
+      │   │   └── entity
+      │   ├── service
+      │   │   └── Impl
+      │   └── util
+      ├── interaction
+      │   └── dao
+      ├── POJO
+      │   ├── DTO
+      │   ├── entity
+      │   └── VO
+      ├── security
+      │   └── service
+      │       └── Imp
+      ├── service
+      │   └── Imp
+      ├── utils
+      ├── video
+      │   ├── controller
+      │   ├── dao
+      │   ├── eneity
+      │   │   ├── dto
+      │   │   └── pojo
+      │   └── service
+      │       └── imp
+      └── ws
+└── resources
+    ├── lua
+    ├── mapper
+    ├── static
+    │   └── config
+    └── templates

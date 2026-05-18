@@ -2,10 +2,19 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.peanut.dao.VideoDao">
-    <select id="selectVideoListById" resultType="com.peanut.POJO.entity.Video">
+<mapper namespace="com.peanut.video.dao.VideoDao">
+
+    <insert id="insertVideo" parameterType="com.peanut.video.eneity.pojo.Video">
+        INSERT INTO video
+        (id, title, description, cover_url, video_url, cover_ori_url, video_ori_url,  user_id, like_count, comment_count, visit_count,
+         status, created_at, updated_at, deleted_at, deleted)
+        VALUES (#{id}, #{title}, #{description}, #{coverurl}, #{videourl},#{videoOriUrl} ,#{coverOriUrl}, #{userid}, #{likeCount},
+                #{commentCount}, #{visitCount}, #{status}, #{createdAt}, #{updatedAt}, #{deletedAt}, #{deleted})
+    </insert>
+
+    <select id="selectVideoListById" resultType="com.peanut.video.eneity.pojo.Video">
         SELECT `id`, `user_id`, `video_url`,`cover_url`,`title`,`description`,
-        `like_count`,`comment_count`,`created_at`,`updated_at`,`deleted_at`
+        `like_count`,`comment_count`,`visit_count`,`status`,`origin_url`,`created_at`,`updated_at`,`deleted_at`
         from `video`
         WHERE id IN
         <foreach collection="ids" item="id" open="(" separator="," close=")">
@@ -27,7 +36,7 @@
         </foreach>
     </update>
 
-    <select id="selectHomePageVideo" resultType="com.peanut.POJO.entity.Video">
+    <select id="selectHomePageVideo" resultType="com.peanut.video.eneity.pojo.Video">
         SELECT `id`, `user_id`, `video_url`,`cover_url`,`title`,`description`,
         `like_count`,`comment_count`,`created_at`,`updated_at`,`deleted_at`
         from `video`
@@ -47,15 +56,35 @@
         where id = #{videoId}
     </update>
 
-    <select id="selectVideoPending" resultType="Video">
-        SELECT
-            *
-        FROM
-            video
-        WHERE
-            status = 'pending'
+    <select id="selectVideoPending" resultType="com.peanut.video.eneity.pojo.Video">
+        SELECT *
+        FROM video
+        WHERE status = 'pending'
           AND deleted = 0
         ORDER BY id DESC
-            LIMIT #{size} OFFSET #{(page - 1) * size}
+            LIMIT #{size}
+        OFFSET #{page}
     </select>
+
+    <update id="updateVideo" parameterType="com.peanut.video.eneity.pojo.Video">
+        UPDATE video
+        <set>
+            <if test="title != null">title = #{title},</if>
+            <if test="description != null">description = #{description},</if>
+            <if test="coverurl != null">cover_url = #{coverurl},</if>
+            <if test="coverOriUrl != null">cover_ori_url = #{coverOriUrl},</if>
+            <if test="videourl != null">video_url = #{videourl},</if>
+            <if test="videoOriUrl != null">video_ori_url = #{videoOriUrl},</if>
+            <if test="userid != null">user_id = #{userid},</if>
+            <if test="likeCount != null">like_count = #{likeCount},</if>
+            <if test="commentCount != null">comment_count = #{commentCount},</if>
+            <if test="visitCount != null">visit_count = #{visitCount},</if>
+            <if test="status != null">status = #{status},</if>
+            <if test="createdAt != null">created_at = #{createdAt},</if>
+            <if test="updatedAt != null">updated_at = #{updatedAt},</if>
+            <if test="deletedAt != null">deleted_at = #{deletedAt},</if>
+            <if test="deleted != null">deleted = #{deleted},</if>
+        </set>
+        WHERE id = #{id}
+    </update>
 </mapper>

@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peanut.im.dao.UserConversationDao">
+
+    <!-- 会话列表：按 pinned desc, list_cursor_seq desc 排 -->
+    <select id="selectList" resultType="com.peanut.im.pojo.dto.ConversationListItemDTO">
+        SELECT
+            uc.conversation_id AS conversationId,
+            uc.pinned,
+            uc.mute,
+            uc.last_read_seq AS lastReadSeq,
+            uc.unread_count AS unreadCount,
+            uc.list_cursor_seq AS listCursorSeq,
+            uc.updated_at AS updatedAt,
+
+            c.type AS conversationType,
+            c.name AS conversationName,
+            c.avatar AS conversationAvatar,
+            c.last_msg_id AS lastMsgId,
+            c.last_seq AS lastSeq
+        FROM user_conversation uc
+                 JOIN conversations c ON c.id = uc.conversation_id
+        WHERE uc.user_id = #{userId}
+        ORDER BY uc.pinned DESC, uc.list_cursor_seq DESC, uc.conversation_id DESC
+            LIMIT #{size} OFFSET #{offset}
+    </select>
+
+    <!-- 初始化 user_conversation：幂等 -->
+    <insert id="insertIgnore">
+        INSERT IGNORE INTO user_conversation (
+            user_id, conversation_id,
+            pinned, mute,
+            last_read_seq, unread_count,
+            list_cursor_seq, updated_at, created_at
+        ) VALUES (
+        #{userId}, #{conversationId},
+        0, 0,
+        #{lastReadSeq}, 0,
+        #{listCursorSeq}, #{updatedAt}, #{updatedAt}
+        )
+    </insert>
+
+    <!-- 发送方：发出后一般认为已读到最新 seq，unread 归零或不变（这里归零更常见） -->
+    <update id="onSendMessage">
+        UPDATE user_conversation
+        SET last_read_seq = GREATEST(last_read_seq, #{lastReadSeq}),
+            unread_count = 0,
+            list_cursor_seq = #{lastReadSeq},
+            updated_at = #{serverTime}
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+    </update>
+
+    <!-- 接收方：unread +inc，cursor 更新到最新 seq -->
+    <update id="onReceiveMessage">
+        UPDATE user_conversation
+        SET unread_count = unread_count + #{incUnread},
+            list_cursor_seq = #{listCursorSeq},
+            updated_at = #{serverTime}
+        WHERE user_id = #{userId}
+          AND conversation_id = #{conversationId}
+    </update>
+
+    <!-- 群：除自己外所有成员 unread +inc-->
+    <update id="incrUnreadForAllExcept">
+        UPDATE user_conversation
+        SET unread_count = unread_count + #{incUnread},
+            updated_at = #{updatedAt}
+        WHERE conversation_id = #{conversationId}
+          AND user_id &lt;&gt; #{excludeUserId}
+    </update>
+
+</mapper>

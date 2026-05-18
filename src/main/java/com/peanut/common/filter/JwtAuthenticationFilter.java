@@ -18,11 +18,13 @@ import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+
 import java.io.IOException;
 
 /**
  * jwt拦截器
  * 判断是否为合法用户并放行
+ *
  * @author: peanut
  * @date: 2025/12/18
  * @version:1.0
@@ -63,41 +65,77 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
                                     HttpServletResponse response,
                                     FilterChain filterChain) throws ServletException, IOException {
 
-        // 步骤 1：从请求头提取 Token（格式：Authorization: Bearer xxxxxx）
-        String token = request.getHeader("X-Access-Token");
-        String username = null;
-
-        // 校验请求头格式：必须以 "Bearer " 开头
-        if (token != null && !token.isEmpty()) {
-            try {
-                username = jwtUtil.extractUsername(token); // 从 Token 中解析用户名
-            } catch (Exception e) {
-                // Token 解析失败（如签名错误、格式错误），直接放行，后续会抛 401
-                logger.error("Token 解析失败：{}", e.getMessage());
-            }
+        // 0) 如果已经有认证信息，直接放行（避免重复解析 JWT）
+        if (SecurityContextHolder.getContext().getAuthentication() != null) {
+            filterChain.doFilter(request, response);
+            return;
         }
 
-        // 步骤 2：Token 有效且用户未登录（SecurityContext 中无认证信息）
-        if (username != null && SecurityContextHolder.getContext().getAuthentication() == null) {
-            // 步骤 3：从数据库查询用户信息（UserDetailService 需自定义实现）
+        // 1) 提取 token（兼容 X-Access-Token / Authorization: Bearer）
+        String token = resolveToken(request);
+        if (token == null) {
+            // 是否需要登录由 Spring Security 的授权规则决定
+            filterChain.doFilter(request, response);
+            return;
+        }
+
+        try {
+            // 2) 先验签 + 校验过期（不查库）
+            if (!jwtUtil.validateAccessTokenSignatureAndExpiry(token)) {
+                // token 不合法：不注入认证，交给后续的 Security 决定是否 401
+                logger.debug("JWT 无效（验签/过期失败），uri={}", request.getRequestURI());
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // 3) token 可信后再提取 username
+            String username = jwtUtil.extractUsername(token);
+            if (username == null || username.isBlank()) {
+                filterChain.doFilter(request, response);
+                return;
+            }
+
+            // 4) 查库拿 userDetails（用于权限/封禁/用户不存在等判定）
             LoginUser userDetails = userDetailsService.loadUserByUsername(username);
 
-            // 步骤 4：验证 Token 有效性（签名正确 + 未过期）
-            if (jwtUtil.validateToken(token, userDetails)) {
-                // 步骤 5：将用户信息注入 SecurityContext（关键！让 Spring Security 认可登录状态）
-                UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
-                        userDetails, // 主体：用户信息
-                        null, // 凭证：Token 验证场景下无需密码
-                        userDetails.getAuthorities() // 用户权限/角色
-                );
-                // 附加请求详情（如 IP、Session ID）
-                authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
-                // 注入上下文（后续接口可通过 SecurityContext 获取用户信息）
-                SecurityContextHolder.getContext().setAuthentication(authToken);
-            }
+            // 5) （可选）进一步校验：比如 user 是否禁用、tokenVersion 等
+            // 如果你想支持“踢下线/强制失效”，建议在这里做额外校验
+
+            // 6) 注入 SecurityContext
+            UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
+                    userDetails, // 主体：用户信息
+                    null, // 凭证：Token 验证场景下无需密码
+                    userDetails.getAuthorities() // 用户权限/角色
+            );
+            authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
+            SecurityContextHolder.getContext().setAuthentication(authToken);
+        } catch (Exception e) {
+            // 不要 error 级别刷屏（无效 token 可能很多）
+            logger.debug("JWT 处理异常，uri={}, msg={}", request.getRequestURI(), e.getMessage());
+            // 不注入认证，继续走，让后续决策
         }
 
-        // 步骤 6：放行请求，继续执行后续过滤器（如权限校验、接口业务逻辑）
         filterChain.doFilter(request, response);
+    }
+
+    private String resolveToken(HttpServletRequest request) {
+        String t = request.getHeader("X-Access-Token");
+        if (t != null) {
+            t = t.trim();
+            if (!t.isBlank()) return t;
+        }
+
+        String auth = request.getHeader("Authorization");
+        if (auth != null) {
+            auth = auth.trim();
+            String BEARER_PREFIX = "Bearer ";
+            if (auth.startsWith(BEARER_PREFIX)) {
+                String token = auth.substring(BEARER_PREFIX.length()).trim();
+                return token.isBlank() ? null : token;
+            }
+            // 兼容部分客户端直接 Authorization: <token>
+            return auth.isBlank() ? null : auth;
+        }
+        return null;
     }
 }

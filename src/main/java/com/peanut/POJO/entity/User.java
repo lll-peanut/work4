@@ -12,6 +12,7 @@ import java.time.LocalDateTime;
 
 public class User {
 
+    @JsonProperty("user_name")
     private String username;
 
     @JsonIgnore
@@ -39,6 +40,9 @@ public class User {
     @JsonProperty("updated_at")
     private LocalDateTime updatedAt;
 
+
+    private String role;
+
     public User(){}
 
     public User(String username, String password) {
@@ -46,7 +50,7 @@ public class User {
         this.password = password;
     }
 
-    public User(String username, String password, String id, String avatarUrl, LocalDateTime createdAt, LocalDateTime deletedAt, LocalDateTime updatedAt) {
+    public User(String username, String password, String id, String avatarUrl, LocalDateTime createdAt, LocalDateTime deletedAt, LocalDateTime updatedAt, String role) {
         this.username = username;
         this.password = password;
         this.id = id;
@@ -54,6 +58,7 @@ public class User {
         this.createdAt = createdAt;
         this.deletedAt = deletedAt;
         this.updatedAt = updatedAt;
+        this.role = role;
     }
 
     public String getUsername() {
@@ -112,6 +117,14 @@ public class User {
         this.updatedAt = updatedAt;
     }
 
+    public String getRole() {
+        return role;
+    }
+
+    public void setRole(String role) {
+        this.role = role;
+    }
+
     @Override
     public String toString() {
         return "User{" +
@@ -122,6 +135,7 @@ public class User {
                 ", createdAt=" + createdAt +
                 ", deletedAt=" + deletedAt +
                 ", updatedAt=" + updatedAt +
+                "role='" + role + '\'' +
                 '}';
     }
 }

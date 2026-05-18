@@ -137,4 +137,9 @@ public class SocialServiceImp implements SocialService {
         ArrayList<UserVO> userVOS = userRelationDao.getFriendsById(userId, pageNum, pageSize);
         return new POJOList(userVOS, l);
     }
+
+    @Override
+    public int isFriend(String userId, String otherUserId) {
+        return userRelationDao.ifFriends(userId, otherUserId);
+    }
 }

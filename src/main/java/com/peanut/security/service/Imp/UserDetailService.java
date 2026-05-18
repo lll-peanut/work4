@@ -32,7 +32,7 @@ public class UserDetailService implements UserDetailsService {
         }
 
         // 示例：按你实际的角色/权限来源填充
-        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_USER"));
+        List<SimpleGrantedAuthority> authorities = List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole()));
 
         return new LoginUser(
                 user.getId(),

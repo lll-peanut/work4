@@ -1,16 +1,16 @@
 package com.peanut.POJO.entity;
 
 public class Base {
-    private long code;
+    private int code;
     private String msg;
 
-    public long getCode() { return code; }
-    public void setCode(long value) { this.code = value; }
+    public int getCode() { return code; }
+    public void setCode(int value) { this.code = value; }
 
     public String getMsg() { return msg; }
     public void setMsg(String value) { this.msg = value; }
 
-    public Base(long code, String msg) {
+    public Base(int code, String msg) {
         this.code = code;
         this.msg = msg;
     }

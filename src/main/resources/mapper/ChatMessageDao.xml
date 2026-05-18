@@ -5,7 +5,7 @@
 <mapper namespace="com.peanut.im.dao.ChatMessageDao">
 
     <select id="findByMsgIdDesc" resultType="com.peanut.im.pojo.entity.ChatMessage">
-        SELECT msg_id, client_msg_id, conversation_id, from_user_id, to_target_id, server_time,
+        SELECT msg_id, client_msg_id, conversation_id, from_user_id, server_time,
                content, msg_type, sequence, conversation_type
         from `chat_message`
         WHERE msg_id IN
@@ -17,7 +17,7 @@
 
     <select id="findHistory" resultType="com.peanut.im.pojo.entity.ChatMessage">
         SELECT
-        msg_id, client_msg_id, conversation_id, from_user_id, to_target_id, server_time, content,
+        msg_id, client_msg_id, conversation_id, from_user_id, server_time, content,
         msg_type, sequence, conversation_type
         FROM chat_message
         WHERE 1=1

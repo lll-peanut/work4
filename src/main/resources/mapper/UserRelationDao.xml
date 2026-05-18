@@ -15,16 +15,16 @@
     <insert id="insertOrUpdateFollow" parameterType="com.peanut.POJO.entity.UserRelation"
             useGeneratedKeys="false" keyProperty="id">
         INSERT INTO user_relation (id, user_id, to_user_id, status, created_at, updated_at)
-        VALUES (#{id}, #{userId}, #{toUserId}, 0, NOW(), NOW()) ON DUPLICATE KEY
+        VALUES (#{id}, #{userId}, #{toUserId}, 0, #{createdAt}, #{updatedAt}) ON DUPLICATE KEY
         UPDATE
-            updated_at = IF(status = 1, NOW(), updated_at),
+            updated_at = IF(status = 1, #{updatedAt}, updated_at),
             status = IF(status = 1, 0, status);
     </insert>
 
     <update id="insertOrUpdateUnFollow" parameterType="com.peanut.POJO.entity.UserRelation">
         UPDATE user_relation
         SET status     = 1,
-            updated_at = NOW()
+            updated_at = #{updatedAt}
         WHERE user_id = #{userId}
           AND to_user_id = #{toUserId}
           AND status = 0 LIMIT 1;
@@ -98,6 +98,20 @@
               WHERE ur1.user_id = #{id}
                 AND ur1.status = 0
                 AND ur2.status = 0) AS temp;
+    </select>
+
+    <select id="isFriends" resultType="int">
+        SELECT
+            COUNT(*)
+        FROM
+            user_relation r1
+                JOIN
+            user_relation r2
+            ON r1.user_id = #{userId} AND r1.to_user_id = #{otherUserId}
+                AND r2.user_id = #{otherUserId} AND r2.to_user_id = #{userId}
+        WHERE
+            r1.status = 0 AND r2.status = 0
+          AND r1.deleted_at IS NULL AND r2.deleted_at IS NULL
     </select>
 
 </mapper>

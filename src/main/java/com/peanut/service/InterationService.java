@@ -1,18 +1,15 @@
 package com.peanut.service;
 
+import com.peanut.POJO.DTO.LikesDTO;
 import com.peanut.POJO.entity.Comment;
 import com.peanut.POJO.entity.POJOList;
-import com.peanut.POJO.entity.Video;
+import com.peanut.video.eneity.pojo.Video;
 
 import java.util.List;
 
 public interface InterationService {
 
-    void likeVideo(String userId, String videoId, Integer isLike);
-
     POJOList<Video> getLikeVideos(String userId, int pageNum, int pageSize);
-
-    void likeComment(String userId, String commentId, Integer isLike);
 
     List<Video> getLikeComments(String userId, int pageNum, int pageSize);
 
@@ -22,7 +19,9 @@ public interface InterationService {
 
     void deleteComment(String userId, String videoId, String commentId);
 
-    void likeToMysql();
+    void likesToMysql();
 
-    void commentLikeToMysql();
+    public void like(LikesDTO likesDTO, String userId);
+
+
 }

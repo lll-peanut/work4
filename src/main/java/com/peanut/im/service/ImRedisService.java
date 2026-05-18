@@ -1,5 +1,6 @@
 package com.peanut.im.service;
 
+import com.peanut.im.dao.DmPairsDao;
 import com.peanut.im.pojo.entity.ChatMessage;
 import com.peanut.im.enumPackage.ConversationType;
 import com.peanut.ws.OnlineSessionRegistry;
@@ -33,27 +34,20 @@ public class ImRedisService {
     @Autowired
     private GroupService groupService;
 
+    @Autowired
+    private DmPairsDao dmPairsDao;
+
+    @Autowired
+    private ConversationMembersService conversationMembersService;
+
     private static final Logger logger = LoggerFactory.getLogger(ImRedisService.class);
 
-    public boolean handleMessage(ChatMessage msg) {
+    public void handleMessage(ChatMessage msg) {
         if (msg.getConversationType() == ConversationType.SYSTEM) {
-            // TODO: 系统消息推送/日志/单独存储
-            return true;
+            return;
         }
 
-        // 生成去重Key，尝试设置，过期时间2天
-        String dedupKey = "im:dedup:" + msg.getClientMsgId();
-        Boolean first = redis.opsForValue().setIfAbsent(dedupKey, "1", Duration.ofDays(2));
-        if (first == null || !first) {
-            logger.warn("Redis去重setIfAbsent异常, 跳过消息处理: msgId={}", msg.getMsgId());
-            return false;
-        }
-        // todo seq用Long，之后加个归档 redis掉了要从mysql里补数据，超过21亿就有问题了
-        String seqKey = "im:seq:" + msg.getConversationId();
-        Long seq = redis.opsForValue().increment(seqKey);
-        Long sequence = seq != null ? seq : 1L;
-        msg.setSequence(sequence);
-
+        Long sequence = msg.getSequence(); // DB 生成的
 
         //每个会话的消息ID有序集合，score用sequence，value用msgId
         String msgId = msg.getMsgId();
@@ -64,13 +58,17 @@ public class ImRedisService {
         String lastKey = "im:conv:last:" + msg.getConversationId();
         redis.opsForValue().set(lastKey, msgId, Duration.ofDays(7));
 
-        Set<String> receiverUserIds = null;
+        List<String> receiverUserIds = new java.util.ArrayList<>();
         if (msg.getConversationType() == (ConversationType.GROUP)) {
-            // 群聊：全体成员列表
-            receiverUserIds = groupService.getGroupMembersUserIds(msg.getConversationId());
+            List<String> members = conversationMembersService.getGroupMemberIds(msg.getConversationId());
+            if (members != null) receiverUserIds.addAll(members);
+            receiverUserIds.remove(msg.getFromUserId());
         } else if (msg.getConversationType() == (ConversationType.USER)) {
             // 单聊：对方
-            receiverUserIds = Collections.singleton(msg.getToTargetId());
+            String toUserId = dmPairsDao.getToUserIdByConversationId(msg.getConversationId(), msg.getFromUserId());
+            if (toUserId != null && !toUserId.isBlank() && !toUserId.equals(msg.getFromUserId())) {
+                receiverUserIds.add(toUserId);
+            }
         }
         for (String userId : receiverUserIds) {
             // 未读计数（field为conversationId，支持多会话未读分离）
@@ -78,6 +76,21 @@ public class ImRedisService {
             redis.opsForHash().increment(unreadKey, msg.getConversationId(), 1L);
             redis.expire(unreadKey, Duration.ofDays(30));
         }
-        return true;
+    }
+
+    public boolean isMessageHandled(String clientMsgId) {
+        // 生成去重Key，尝试设置，过期时间2天
+        String dedupKey = "im:dedup:" + clientMsgId;
+        Boolean first = redis.opsForValue().setIfAbsent(dedupKey, "1", Duration.ofDays(2));
+        if (first == null || !first) {
+            logger.warn("消息重复处理, 跳过消息处理: msgId={}", clientMsgId);
+            return true;
+        }
+        return false;
+    }
+
+    public long nextListCursor(String userId) {
+        Long v = redis.opsForValue().increment("im:list_cursor:" + userId);
+        return v != null ? v : 1L;
     }
 }

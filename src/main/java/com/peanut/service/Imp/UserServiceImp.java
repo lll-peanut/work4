@@ -1,6 +1,7 @@
 package com.peanut.service.Imp;
 
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
+import com.peanut.POJO.entity.Image;
 import com.peanut.dao.ImageDao;
 import com.peanut.dao.UserDao;
 import com.peanut.POJO.DTO.MFABindDTO;
@@ -189,7 +190,8 @@ public class UserServiceImp implements UserService {
 
         // 这里示例：按 hash 精确匹配一条图片 URL
         // 你也可以改成：返回相似度最高的一条、或返回列表
-        String url = imageDao.findUrlByMd5(md5);
+        Image image = imageDao.findUrlByMd5(md5);
+        String url = image.getUrl();
         if (url == null || url.isBlank()) {
             // 没搜到的兜底策略：返回空或固定提示图，看你接口约定
             return "";

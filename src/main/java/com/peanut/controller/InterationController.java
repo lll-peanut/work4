@@ -1,14 +1,16 @@
 package com.peanut.controller;
 
+import com.peanut.POJO.DTO.LikesDTO;
 import com.peanut.POJO.entity.Comment;
 import com.peanut.POJO.entity.POJOList;
 import com.peanut.POJO.entity.Resp;
-import com.peanut.POJO.entity.Video;
+import com.peanut.video.eneity.pojo.Video;
 import com.peanut.annotation.CurrentUserId;
 import com.peanut.annotation.RedisLimitOnClassAnnotation;
 import com.peanut.expection.BusinessException;
 import com.peanut.service.InterationService;
 import com.peanut.utils.PageUtil;
+import jakarta.validation.Valid;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -54,21 +56,10 @@ public class InterationController {
     private static final String OPERATION_CANCEL_LIKE = "取消点赞";
 
     @PostMapping("/like/action")
-    public Resp like(@RequestParam(value = "video_id", required = false) String videoId,
-                     @RequestParam(value = "comment_id", required = false) String commentId,
-                     @RequestParam("action_type") Integer actionType,
+    public Resp like(@Valid @RequestBody LikesDTO likesDTO,
                      @CurrentUserId String userId) {
-        validateVideoIdAndCommentId(videoId, commentId);
-        if (actionType != 1 && actionType != 0) {
-            throw new BusinessException("点赞类型只能是1和0");
-        }
-        if (StringUtils.hasText(videoId)) {
-            interationService.likeVideo(userId, videoId, actionType);
-            logger.info(VIDEO_LIKE_SUCCESS, userId, videoId, actionType == 1 ? OPERATION_LIKE : OPERATION_CANCEL_LIKE);
-        } else {
-            interationService.likeComment(userId, commentId, actionType);
-            logger.info(COMMENT_LIKE_SUCCESS, userId, commentId, actionType == 1 ? OPERATION_LIKE : OPERATION_CANCEL_LIKE);
-        }
+            interationService.like(likesDTO, userId);
+            logger.info(userId + "点赞操作成功");
         return Resp.success(null);
     }
 

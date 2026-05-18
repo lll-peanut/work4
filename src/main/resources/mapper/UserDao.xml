@@ -2,18 +2,44 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.peanut.dao.UserDao">
-    <select id="selectExistIds" resultType="java.lang.String">
-        SELECT u.id FROM user u
-        WHERE u.id IN
-        <foreach collection="ids" item="id" open="(" separator="," close=")">
-            #{id}
-        </foreach>
-        LIMIT 2
+<mapper namespace="com.peanut.im.dao.BlockDao">
+
+    <!-- userId 是否拉黑了 blockedUserId：status=0 且未删除 -->
+    <select id="isBlocked" resultType="boolean">
+        SELECT
+            CASE WHEN COUNT(1) &gt; 0 THEN TRUE ELSE FALSE END
+        FROM user_block ub
+        WHERE ub.user_id = #{userId}
+          AND ub.blocked_user_id = #{blockedUserId}
+          AND ub.status = 0
+          AND ub.deleted_at IS NULL
+            LIMIT 1
     </select>
-    <update id="updateMFASecret">
-        UPDATE user
-        SET mfa_secret = #{secret}
-        WHERE id = #{userId}
+
+    <!-- 拉黑：幂等（依赖唯一键 user_id + blocked_user_id） -->
+    <insert id="insertBlock">
+        INSERT INTO user_block (
+            id, user_id, blocked_user_id, status,
+            created_at, updated_at, deleted_at
+        ) VALUES (
+                     #{id}, #{userId}, #{blockedUserId}, 0,
+                     NOW(), NOW(), NULL
+                 )
+            ON DUPLICATE KEY UPDATE
+                                 status = 0,
+                                 deleted_at = NULL,
+                                 updated_at = NOW()
+    </insert>
+
+    <!-- 解除拉黑 -->
+    <update id="removeBlock">
+        UPDATE user_block
+        SET status = 1,
+            deleted_at = NOW(),
+            updated_at = NOW()
+        WHERE user_id = #{userId}
+          AND blocked_user_id = #{blockedUserId}
+          AND deleted_at IS NULL
     </update>
+
 </mapper>

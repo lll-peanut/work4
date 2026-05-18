@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.peanut.im.dao.ConversationDao">
+    <select id="getConversationList" resultType="com.peanut.im.pojo.dto.ConversationListItemDTO">
+        SELECT c.id               AS conversationId,
+               c.type             AS conversationType,
+
+               -- 会话显示名/头像：群用 conversations；单聊用对方用户信息
+               CASE
+                   WHEN c.type = 'GROUP' THEN c.name
+                   ELSE u.username
+                   END            AS conversationName,
+
+               CASE
+                   WHEN c.type = 'GROUP' THEN c.avatar
+                   ELSE u.avatar_url
+                   END            AS conversationAvatar,
+
+               c.owner_id         AS ownerId,
+
+               c.last_msg_id      AS lastMsgId,
+               c.last_seq         AS lastSeq,
+
+               uc.pinned          AS pinned,
+               uc.mute            AS mute,
+               uc.last_read_seq   AS lastReadSeq,
+               uc.unread_count    AS unreadCount,
+               uc.list_cursor_seq AS listCursorSeq,
+               uc.updated_at      AS listUpdatedAt
+
+        FROM user_conversation uc
+                 JOIN conversation c
+                      ON c.id = uc.conversation_id
+
+            -- 找到单聊“对方那条成员记录”（群聊会 join 出多条，所以要限制在 type=1 才 join）
+                 LEFT JOIN conversation_members cm_peer
+                           ON cm_peer.conversation_id = c.id
+                               AND cm_peer.user_id &lt;&gt; #{userId}
+                               AND c.type = 1
+
+                 LEFT JOIN user u
+                           ON u.id = cm_peer.user_id
+
+        WHERE uc.user_id = #{userId}
+
+        ORDER BY uc.pinned DESC, uc.list_cursor_seq desc
+            LIMIT #{offset}, #{pageSize}
+    </select>
+
+
+    <select id="findById" resultType="com.peanut.im.pojo.entity.Conversation">
+        SELECT
+            id,
+            type,
+            peer_key AS peerKey,
+            name,
+            avatar,
+            owner_id AS ownerId,
+            last_msg_id AS lastMsgId,
+            last_seq AS lastSeq,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM conversation
+        WHERE id = #{conversationId}
+            LIMIT 1
+    </select>
+
+    <select id="findDmByPeerKey" resultType="com.peanut.im.pojo.entity.Conversation">
+        SELECT
+            id,
+            type,
+            peer_key AS peerKey,
+            name,
+            avatar,
+            owner_id AS ownerId,
+            last_msg_id AS lastMsgId,
+            last_seq AS lastSeq,
+            created_at AS createdAt,
+            updated_at AS updatedAt
+        FROM conversation
+        WHERE peer_key = #{peerKey}
+          AND type = 'USER'
+            LIMIT 1
+    </select>
+
+    <insert id="insertConversation">
+        INSERT INTO conversation (
+            id, type, peer_key, name, avatar, owner_id,
+            last_msg_id, last_seq, created_at, updated_at
+        ) VALUES (
+                     #{id}, #{type}, #{peerKey}, #{name}, #{avatar}, #{ownerId},
+                     #{lastMsgId}, #{lastSeq}, #{createdAt}, #{updatedAt}
+                 )
+    </insert>
+
+    <update id="updateLast">
+        UPDATE conversation
+        SET last_msg_id = #{lastMsgId},
+            last_seq = #{lastSeq},
+            updated_at = #{updatedAt}
+        WHERE id = #{conversationId}
+    </update>
+
+    <!-- seq 自增：先 +1 -->
+    <update id="incrSeq">
+        UPDATE conversation
+        SET last_seq = last_seq + 1,
+            updated_at = #{updatedAt}
+        WHERE id = #{conversationId}
+    </update>
+
+    <!-- 再查出 last_seq 作为 nextSeq -->
+    <select id="selectLastSeq" resultType="java.lang.Long">
+        SELECT last_seq
+        FROM conversation
+        WHERE id = #{conversationId}
+            LIMIT 1
+    </select>
+</mapper>

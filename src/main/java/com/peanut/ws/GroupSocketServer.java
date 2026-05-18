@@ -10,6 +10,7 @@ import com.peanut.im.pojo.entity.ChatMessage;
 import com.peanut.im.pojo.dto.ChatAck;
 import com.peanut.im.pojo.dto.ChatMessageDTO;
 import com.peanut.im.mq.ChatProducer;
+import com.peanut.im.service.ConversationService;
 import jakarta.websocket.*;
 import jakarta.websocket.server.PathParam;
 import jakarta.websocket.server.ServerEndpoint;
@@ -40,6 +41,8 @@ public class GroupSocketServer {
 
     private static final Logger logger = LoggerFactory.getLogger(GroupSocketServer.class);
 
+    private ConversationService conversationService;
+
     @OnOpen
     public void onOpen(Session session, @PathParam("groupId") String groupId) {
         if (groupId == null) {
@@ -53,6 +56,7 @@ public class GroupSocketServer {
         GroupSessionRegistry.add(groupId, session);
         stringRedisTemplate = SpringContextHolder.getBean(StringRedisTemplate.class);
         chatProducer = SpringContextHolder.getBean(ChatProducer.class);
+        conversationService = SpringContextHolder.getBean(ConversationService.class);
     }
 
     @OnMessage
@@ -66,8 +70,7 @@ public class GroupSocketServer {
             session.getAsyncRemote().sendText(JSON.toJSONString(Resp.fail(new Base(500, "消息格式错误，请检查！"))));
             return;
         }
-        if (chatMessageDTO.getToTargetId() == null
-                || chatMessageDTO.getContent() == null
+        if (chatMessageDTO.getContent() == null
                 || chatMessageDTO.getClientMsgId() == null
                 || chatMessageDTO.getMsgType() == null
                 || chatMessageDTO.getConversationType() == null
@@ -85,10 +88,11 @@ public class GroupSocketServer {
         }
         String msgId = IdWorker.getIdStr();
         String conversationId = chatMessageDTO.getConversationId();
-        ChatMessage chatMessage = new ChatMessage(msgId, chatMessageDTO.getClientMsgId(), conversationId, fromUserId, chatMessageDTO.getToTargetId(),
+        ChatMessage chatMessage = new ChatMessage(msgId, chatMessageDTO.getClientMsgId(), conversationId, fromUserId,
                 LocalDateTime.now(), chatMessageDTO.getContent(), chatMessageDTO.getMsgType(),
                 null, chatMessageDTO.getConversationType());
         try {
+            conversationService.sendMessage(chatMessage);
             chatProducer.sendGroupChat(chatMessage);
             session.getAsyncRemote().sendText(JSON.toJSONString(Resp.success(new ChatAck(msgId, chatMessageDTO.getClientMsgId()))));
         } catch (JSONException e) {

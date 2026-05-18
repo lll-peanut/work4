@@ -1,15 +1,17 @@
 package com.peanut.service;
 
 import com.baomidou.mybatisplus.core.toolkit.IdWorker;
-import com.peanut.POJO.DTO.VideoReviewLogDTO;
-import com.peanut.POJO.entity.Video;
-import com.peanut.POJO.entity.VideoReviewLog;
-import com.peanut.dao.VideoReviewLogDao;
 import com.peanut.expection.BusinessException;
 import com.peanut.im.enumPackage.VideoStatus;
+import com.peanut.video.dao.VideoReviewLogDao;
+import com.peanut.video.eneity.pojo.Video;
+import com.peanut.video.eneity.pojo.VideoReviewLog;
+import com.peanut.video.eneity.dto.VideoReviewLogDTO;
+import com.peanut.video.service.VideoService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,18 +30,23 @@ public class AdminService {
     @Autowired
     private VideoReviewLogDao videoReviewLogDao;
 
+    @Transactional(rollbackFor = Exception.class)
     @PreAuthorize("hasRole('ADMIN')")
     public VideoReviewLog reviewVideo(VideoReviewLogDTO videoReviewLogDto) {
         String videoId = videoReviewLogDto.getVideoId();
         Video video = videoService.getVideo(videoId);
         if (video == null) {
             throw new BusinessException("视频不存在或已被软删除" + videoId);
-        } else if (video.getStatus() != VideoStatus.PENDING) {
+        }
+        if (video.getStatus() != VideoStatus.PENDING) {
             throw new BusinessException("视频已审核过，无法再次审核" + videoId);
         }
         VideoStatus videoStatus = videoReviewLogDto.getDecision();
         if (videoStatus == VideoStatus.APPROVED) {
-            videoService.updateVideoStatus(videoId, VideoStatus.APPROVED);
+            video.setStatus(VideoStatus.APPROVED);
+            video.setVideourl(video.getVideoOriUrl());
+            video.setCoverurl(video.getCoverOriUrl());
+            videoService.updateVideo(video);
         } else if (videoStatus == VideoStatus.REJECTED) {
             videoService.updateVideoStatus(videoId, VideoStatus.REJECTED);
         } else if (videoStatus == VideoStatus.BLOCKED) {
@@ -54,9 +61,9 @@ public class AdminService {
         return videoReviewLog;
     }
 
-    public List<Video> getVideoList() {
-
-        // 这里可以添加获取视频列表的具体逻辑
-        return null;
+    @PreAuthorize("hasRole('ADMIN')")
+    public List<Video> getVideoList(int page, int size) {
+        List<Video> pendingVideos = videoService.getPendingVideos(page, size);
+        return pendingVideos;
     }
 }

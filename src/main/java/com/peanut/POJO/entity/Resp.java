@@ -40,6 +40,10 @@ public class Resp<E> {
         return new Resp(base, null);
     }
 
+    public static<E> Resp<E> failure(int code, String msg) {
+        return new Resp(new Base(code, msg), null);
+    }
+
     public static<E> Resp<E> common(Base base) {
         return new Resp(base, null);
     }

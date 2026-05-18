@@ -1,8 +1,8 @@
 package com.peanut.utils;
 
 import com.peanut.security.LoginUser;
-import com.peanut.service.UserService;
 import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
 import io.jsonwebtoken.security.Keys;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -124,6 +124,26 @@ public class JwtUtil {
                 .build()
                 .parseClaimsJws(token)
                 .getBody();
+    }
+
+    /**
+     * 只做验签+过期校验（不查库）
+     * 返回 true 表示 token 结构合法、签名正确、且未过期
+     */
+    public boolean validateAccessTokenSignatureAndExpiry(String token) {
+        try {
+            Claims claims = Jwts.parserBuilder()
+                    .setSigningKey(getSecretKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody();
+
+            Date exp = claims.getExpiration();
+            return exp != null && exp.after(new Date());
+        } catch (JwtException | IllegalArgumentException e) {
+            // JwtException 覆盖：签名错误、格式错误、过期等
+            return false;
+        }
     }
 
     public long getAccessExpiration() {

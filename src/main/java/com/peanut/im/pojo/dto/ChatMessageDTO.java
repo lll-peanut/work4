@@ -13,11 +13,6 @@ import com.peanut.im.enumPackage.MessageType;
 public class ChatMessageDTO {
 
     /**
-     * 单发时的目标用户ID；广播时可为空
-     */
-    private String toTargetId;
-
-    /**
      * 消息内容
      */
     private String content;
@@ -41,14 +36,6 @@ public class ChatMessageDTO {
      * 会话ID（单发时可选，广播时必填），用于指定消息发送的会话上下文，确保消息正确路由和存储。
      */
     private String conversationId;
-
-    public String getToTargetId() {
-        return toTargetId;
-    }
-
-    public void setToTargetId(String toTargetId) {
-        this.toTargetId = toTargetId;
-    }
 
     public String getContent() { return content; }
     public void setContent(String content) { this.content = content; }
@@ -78,7 +65,6 @@ public class ChatMessageDTO {
     @Override
     public String toString() {
         return "ChatMessageDTO{" +
-                "toUserId='" + toTargetId + '\'' +
                 ", content='" + content + '\'' +
                 ", clientMsgId='" + clientMsgId + '\'' +
                 ", msgType=" + msgType +

@@ -12,4 +12,5 @@ public interface SocialService {
     POJOList friendList(String userId, PageQueryDTO pageQueryDTO);
     void follow(String userId, String toUserId);
     void unfollow(String userId, String toUserId);
+    int isFriend(String userId, String otherUserId);
 }

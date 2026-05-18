@@ -12,14 +12,12 @@ import java.time.LocalDateTime;
  */
 
 public class ChatMessage {
-    // todo 找个时间把toTargetId删了
 
-    public ChatMessage(String msgId, String clientMsgId, String conversationId, String fromUserId, String toTargetId, LocalDateTime serverTime, String content, MessageType msgType, Long sequence, ConversationType conversationType) {
+    public ChatMessage(String msgId, String clientMsgId, String conversationId, String fromUserId, LocalDateTime serverTime, String content, MessageType msgType, Long sequence, ConversationType conversationType) {
         this.msgId = msgId;
         this.clientMsgId = clientMsgId;
         this.conversationId = conversationId;
         this.fromUserId = fromUserId;
-        this.toTargetId = toTargetId;
         this.serverTime = serverTime;
         this.content = content;
         this.msgType = msgType;
@@ -36,8 +34,6 @@ public class ChatMessage {
     private String conversationId;
 
     private String fromUserId;
-
-    private String toTargetId;
 
     private LocalDateTime serverTime;
 
@@ -80,15 +76,6 @@ public class ChatMessage {
     public void setFromUserId(String fromUserId) {
         this.fromUserId = fromUserId;
     }
-
-    public String getToTargetId() {
-        return toTargetId;
-    }
-
-    public void setToTargetId(String toTargetId) {
-        this.toTargetId = toTargetId;
-    }
-
     public LocalDateTime getServerTime() {
         return serverTime;
     }
@@ -136,7 +123,6 @@ public class ChatMessage {
                 ", clientMsgId='" + clientMsgId + '\'' +
                 ", conversationId='" + conversationId + '\'' +
                 ", fromUserId='" + fromUserId + '\'' +
-                ", toTargetId='" + toTargetId + '\'' +
                 ", serverTime=" + serverTime +
                 ", content='" + content + '\'' +
                 ", msgType=" + msgType +
