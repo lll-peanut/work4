@@ -86,6 +86,7 @@ public class DefaultSecurityConfig {
             "/like/list",           // 返回指定用户点赞的视频
             "/following/list",      // 根据 user_id 查看指定人的关注列表
             "/follower/list",       // 根据 user_id 查看指定人的粉丝列表
+            "/chat"
     };
 
     @Bean

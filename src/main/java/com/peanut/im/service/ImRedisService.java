@@ -83,7 +83,7 @@ public class ImRedisService {
         String dedupKey = "im:dedup:" + clientMsgId;
         Boolean first = redis.opsForValue().setIfAbsent(dedupKey, "1", Duration.ofDays(2));
         if (first == null || !first) {
-            logger.warn("消息重复处理, 跳过消息处理: msgId={}", clientMsgId);
+            logger.warn("消息重复处理, 跳过消息处理: climsgId={}", clientMsgId);
             return true;
         }
         return false;

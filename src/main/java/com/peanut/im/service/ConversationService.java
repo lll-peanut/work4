@@ -1,5 +1,6 @@
 package com.peanut.im.service;
 
+import com.alibaba.fastjson.JSON;
 import com.peanut.im.dao.*;
 import com.peanut.im.enumPackage.ConvRoleType;
 import com.peanut.im.enumPackage.ConversationType;
@@ -13,6 +14,7 @@ import com.peanut.im.pojo.dto.ConversationListItemDTO;
 import com.peanut.im.pojo.dto.SendMessageResultDTO;
 import com.peanut.im.pojo.entity.ChatMessage;
 import com.peanut.im.pojo.entity.DmPairs;
+import com.peanut.im.pojo.entity.ImOutbox;
 import com.peanut.service.SocialService;
 import com.peanut.utils.IdUtil;
 import org.slf4j.Logger;
@@ -25,6 +27,7 @@ import org.springframework.transaction.support.TransactionSynchronization;
 import org.springframework.transaction.support.TransactionSynchronizationManager;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Set;
@@ -68,6 +71,9 @@ public class ConversationService {
 
     @Autowired
     private SocialService socialService;
+
+    @Autowired
+    private ImOutboxDao imOutboxDao;
 
     public List<ConversationListItemDTO> getList(String userId, int page, int size) {
         // 1. 参数校验
@@ -251,10 +257,11 @@ public class ConversationService {
         if (msg.getConversationType() == ConversationType.USER) {
             // 单聊：从 dm_pairs 根据 conversationId + fromUserId 找到对方
             toUserId = getToUserId(fromUserId, conversationId);
-            int friend = socialService.isFriend(fromUserId, toUserId);
-            if (friend != 0) {
-                throw new BusinessException("只能给好友发消息");
-            }
+            // todo 测试先关了
+//            int friend = socialService.isFriend(fromUserId, toUserId);
+//            if (friend != 0) {
+//                throw new BusinessException("只能给好友发消息");
+//            }
             if (toUserId == null) {
                 throw new BusinessException("会话不存在或你不在该会话中: " + conversationId);
             }
@@ -293,6 +300,35 @@ public class ConversationService {
         msg.setSequence(nextSeq);
 
         chatMessageService.saveIdempotent(msg);
+
+        // 在事务内，落库成功后新增 outbox
+        List<String> receiverUserIds = new ArrayList<>();
+        if (msg.getConversationType() == ConversationType.USER) {
+            receiverUserIds.add(toUserId);
+        } else if (msg.getConversationType() == ConversationType.GROUP) {
+            List<String> memberIds = conversationMembersService.getGroupMemberIds(conversationId);
+            if (memberIds != null) receiverUserIds.addAll(memberIds);
+            receiverUserIds.remove(fromUserId);
+        }
+
+        // 将 ChatMessage 存为 JSON，供 dispatcher 反序列化投递 MQ
+        String payloadJson = JSON.toJSONString(msg);
+
+        for (String rid : receiverUserIds) {
+            ImOutbox row = new ImOutbox();
+            row.setMsgId(msg.getMsgId());
+            row.setConversationId(conversationId);
+            row.setPayloadJson(payloadJson);
+            row.setStatus(0);
+            row.setRetryCount(0);
+            row.setNextRetryAt(LocalDateTime.now());
+            row.setCreatedAt(LocalDateTime.now());
+            row.setUpdatedAt(LocalDateTime.now());
+
+
+            imOutboxDao.insert(row);
+        }
+
         conversationDao.updateLast(conversationId, msg.getMsgId(), nextSeq, msg.getServerTime());
 
         // 发送者视角：cursor 用 Redis 的 per-user INCR

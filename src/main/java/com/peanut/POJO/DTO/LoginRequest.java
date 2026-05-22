@@ -1,4 +1,4 @@
-package com.peanut.im.pojo.dto;
+package com.peanut.POJO.DTO;
 
 /**
  * @author: peanut

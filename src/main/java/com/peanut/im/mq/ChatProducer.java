@@ -16,13 +16,8 @@ public class ChatProducer {
     @Autowired
     private RabbitTemplate rabbitTemplate;
 
-    public void sendSingleChat(ChatMessage chatMessage) {
+    public void sendChatMessage(ChatMessage chatMessage) {
         String singleChatRoutingKey = ImMqConfig.getSingleChatRoutingKey(chatMessage.getFromUserId());
         rabbitTemplate.convertAndSend(ImMqConfig.EXCHANGE, singleChatRoutingKey, chatMessage);
-    }
-
-    public void sendGroupChat(ChatMessage chatMessage) {
-        String groupChatRoutingKey = ImMqConfig.getGroupChatRoutingKey(chatMessage.getConversationId());
-        rabbitTemplate.convertAndSend(ImMqConfig.GROUP_EXCHANGE, groupChatRoutingKey, chatMessage);
     }
 }

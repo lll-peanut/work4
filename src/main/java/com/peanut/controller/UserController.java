@@ -6,7 +6,7 @@ import com.peanut.annotation.CurrentUserId;
 import com.peanut.annotation.RedisLimitOnClassAnnotation;
 import com.peanut.annotation.SystemLog;
 import com.peanut.apsect.SystemLogAspect;
-import com.peanut.im.pojo.dto.LoginRequest;
+import com.peanut.POJO.DTO.LoginRequest;
 import com.peanut.security.LoginUser;
 import com.peanut.service.UserService;
 import com.peanut.utils.JwtUtil;
@@ -16,14 +16,10 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.core.Authentication;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.util.Map;
 
 /**
  * 用户控制器

@@ -25,17 +25,22 @@ public class WsHandshakeConfigurator extends ServerEndpointConfig.Configurator {
     private static final String USER_NAME_KEY = "userName";
     private static final String TOKEN_KEY = "token";
 
-    @Override public void modifyHandshake(ServerEndpointConfig sec,
-                                          HandshakeRequest request,
-                                          HandshakeResponse response) {
+    @Override
+    public void modifyHandshake(ServerEndpointConfig sec,
+                                HandshakeRequest request,
+                                HandshakeResponse response) {
         super.modifyHandshake(sec, request, response);
 
         Map<String, List<String>> headers = request.getHeaders();
         String token = resolveToken(headers);
         JwtUtil jwtUtil = SpringContextHolder.getBean(JwtUtil.class);
-        String identity = jwtUtil.extractUserId(token);
-        if (identity != null && !identity.isBlank()) {
-            sec.getUserProperties().put(USER_ID_KEY, identity);
+        // 关键：先验签+过期校验（不查库）
+        if (!jwtUtil.validateAccessTokenSignatureAndExpiry(token)) {
+            return;
+        }
+        String userId = jwtUtil.extractUserId(token);
+        if (userId != null && !userId.isBlank()) {
+            sec.getUserProperties().put(USER_ID_KEY, userId);
         }
     }
 

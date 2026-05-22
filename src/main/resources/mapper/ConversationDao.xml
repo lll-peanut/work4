@@ -106,16 +106,12 @@
     <!-- seq 自增：先 +1 -->
     <update id="incrSeq">
         UPDATE conversation
-        SET last_seq = last_seq + 1,
+        SET last_seq = LAST_INSERT_ID(COALESCE(last_seq, 0) + 1),
             updated_at = #{updatedAt}
         WHERE id = #{conversationId}
     </update>
 
-    <!-- 再查出 last_seq 作为 nextSeq -->
     <select id="selectLastSeq" resultType="java.lang.Long">
-        SELECT last_seq
-        FROM conversation
-        WHERE id = #{conversationId}
-            LIMIT 1
+        SELECT LAST_INSERT_ID()
     </select>
 </mapper>
