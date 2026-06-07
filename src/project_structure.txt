@@ -1,0 +1,146 @@
+.
+├── main                          # 项目核心源码目录（生产环境运行的代码）
+│   ├── java                      # Java源代码根目录
+│   │   └── com
+│   │       └── peanut            # 项目基础包名（域名反写规范）
+│   │           ├── annotation    # 自定义注解目录：存放所有业务/框架扩展注解
+│   │           │   ├── CurrentUserId.java       # 当前用户ID注入注解（参数解析用）
+│   │           │   ├── DistributedLock.java     # 分布式锁注解（AOP切面实现）
+│   │           │   ├── RedisLimitAnnotation.java # 方法级限流注解
+│   │           │   ├── RedisLimitOnClassAnnotation.java # 类级限流注解
+│   │           │   └── SystemLog.java            # 操作日志注解（AOP记录日志）
+│   │           ├── apsect        # AOP切面目录：注解的具体实现逻辑
+│   │           │   ├── DistributedLockAspect.java # 分布式锁切面（加锁/释放锁）
+│   │           │   ├── RedisLimitAspect.java     # 方法级限流切面（执行Lua脚本）
+│   │           │   ├── RedisLimitOnCLassAspect.java # 类级限流切面
+│   │           │   └── SystemLogAspect.java      # 操作日志切面（打印日志+用户ID）
+│   │           ├── common        # 通用组件目录：跨模块复用的核心能力
+│   │           │   ├── filter    # 全局过滤器：请求拦截/预处理（如JWT校验）
+│   │           │   │   └── JwtAuthenticationFilter.java # JWT认证过滤器
+│   │           │   └── resolve   # 全局参数解析器：扩展SpringMVC参数解析逻辑
+│   │           │       └── CurrentUserArgumentResolver.java # 当前用户ID参数解析器
+│   │           ├── config        # 配置类目录：Spring/第三方组件的核心配置
+│   │           │   ├── AsyncThreadPoolConfig.java # 异步线程池配置（如视频上传线程池）
+│   │           │   ├── DefaultSecurityConfig.java # SpringSecurity核心配置（认证/授权）
+│   │           │   ├── MpConfig.java              # MyBatis-Plus配置（分页/主键策略）
+│   │           │   ├── RedisConfig.java           # Redis配置（序列化/连接池）
+│   │           │   ├── SpringContextHolder.java   # Spring上下文持有者（获取非Spring管理类的Bean）
+│   │           │   ├── WebConfig.java             # SpringMVC配置（参数解析器/拦截器注册）
+│   │           │   └── WebSocketConfig.java       # WebSocket配置（群聊/实时通信）
+│   │           ├── constant      # 常量目录：全局通用常量/枚举（避免魔法值）
+│   │           │   ├── Code.java                  # 通用状态码/返回码常量
+│   │           │   └── UserRelationConstant.java  # 用户关系常量（关注/取关等）
+│   │           ├── controller    # 控制器目录：接口层（接收请求/返回响应）
+│   │           │   ├── GroupSocketServer.java     # 群聊WebSocket服务端（实时通信）
+│   │           │   ├── InterationController.java  # 互动接口（点赞/评论/关注）
+│   │           │   ├── SocialController.java      # 社交接口（好友/群聊）
+│   │           │   ├── TokenRefreshController.java # Token刷新接口
+│   │           │   ├── UserController.java        # 用户接口（登录/注册/信息）
+│   │           │   ├── VideoController.java       # 视频接口（投稿/查询/播放）
+│   │           │   └── WebSocketServer.java       # 单聊WebSocket服务端
+│   │           ├── Dao           # 数据访问层：MyBatis Mapper接口（数据库操作）
+│   │           │   ├── CommentDao.java            # 评论DAO
+│   │           │   ├── GroupDao.java              # 群聊DAO
+│   │           │   ├── LikeDao.java               # 点赞DAO
+│   │           │   ├── SubscribeDao.java          # 订阅DAO
+│   │           │   ├── UserDao2.java              # 用户扩展DAO
+│   │           │   ├── UserDao.java               # 用户核心DAO
+│   │           │   ├── UserRelationDao.java       # 用户关系DAO
+│   │           │   ├── VideoDao.java              # 视频DAO
+│   │           │   └── VideoLikeDao.java          # 视频点赞DAO
+│   │           ├── enumPackage   # 枚举目录：全局通用枚举（替代常量，类型安全）
+│   │           │   └── LimitTypeEnum.java         # 限流类型枚举（方法/类级）
+│   │           ├── expection     # 异常目录：全局异常体系（自定义异常+处理器）
+│   │           │   ├── BusinessException.java     # 业务异常（用户操作错误）
+│   │           │   └── SystemException.java       # 系统异常（服务内部错误）
+│   │           ├── handler       # 处理器目录：框架扩展处理器（异常/登录等）
+│   │           │   ├── GlobalExpectionHandler.java # 全局异常处理器（统一返回格式）
+│   │           │   ├── LoginFailureHandler.java   # 登录失败处理器
+│   │           │   └── LoginSuccessHandler.java   # 登录成功处理器
+│   │           ├── lock          # 分布式锁目录：锁的具体实现（基于Redisson）
+│   │           │   └── Redisson1Lock.java         # Redisson分布式锁实现
+│   │           ├── POJO          # 数据模型目录：实体/传输对象/返回对象
+│   │           │   ├── AsyncTaskResult.java       # 异步任务结果模型
+│   │           │   ├── Base.java                  # 基础模型（公共字段：创建时间/更新时间）
+│   │           │   ├── Comment.java               # 评论实体
+│   │           │   ├── CommentLike.java           # 评论点赞实体
+│   │           │   ├── CustomUserDetails.java     # SpringSecurity自定义用户信息
+│   │           │   ├── DTO                        # 数据传输对象：入参/跨层传输
+│   │           │   │   ├── PageQueryDTO.java      # 分页查询通用DTO
+│   │           │   │   ├── RelationActionDTO.java # 用户关系操作DTO（关注/取关）
+│   │           │   │   ├── UserPageQueryDTO.java  # 用户分页查询DTO
+│   │           │   │   ├── VideoPostDTO.java      # 视频投稿DTO
+│   │           │   │   └── VideoSearchDTO.java    # 视频搜索DTO
+│   │           │   ├── Friend.java                # 好友实体
+│   │           │   ├── Group.java                 # 群聊实体
+│   │           │   ├── Like.java                  # 点赞实体
+│   │           │   ├── Message.java               # 消息实体（群聊/单聊）
+│   │           │   ├── POJOList.java              # 列表通用包装模型
+│   │           │   ├── Resp.java                  # 接口通用返回模型（统一响应格式）
+│   │           │   ├── Subscribe.java             # 订阅实体
+│   │           │   ├── User.java                  # 用户核心实体
+│   │           │   ├── UserRelation.java          # 用户关系实体
+│   │           │   ├── Video.java                 # 视频实体
+│   │           │   ├── VideoLike.java             # 视频点赞实体
+│   │           │   └── VO                         # 视图对象：返回给前端的结构化数据
+│   │           │       ├── PageVO.java            # 分页返回通用VO
+│   │           │       └── UserVO.java            # 用户信息返回VO
+│   │           ├── service       # 服务层目录：业务逻辑核心（接口+实现分离）
+│   │           │   ├── Imp                        # 服务实现类目录
+│   │           │   │   ├── CommentServiceImp.java # 评论服务实现
+│   │           │   │   ├── InterationServiceImp.java # 互动服务实现（点赞/评论）
+│   │           │   │   ├── RedisServiceImp.java   # Redis服务实现
+│   │           │   │   ├── SocialServiceImp.java  # 社交服务实现（好友/群聊）
+│   │           │   │   ├── UserServiceImp.java    # 用户服务实现
+│   │           │   │   └── VideoServiceImp.java   # 视频服务实现（投稿/上传）
+│   │           │   ├── CommentService.java        # 评论服务接口
+│   │           │   ├── CustomUserDetailsService.java # SpringSecurity用户详情服务
+│   │           │   ├── InterationService.java     # 互动服务接口
+│   │           │   ├── RedisService.java          # Redis服务接口
+│   │           │   ├── SocialService.java         # 社交服务接口
+│   │           │   ├── UserService.java           # 用户服务接口
+│   │           │   └── VideoService.java          # 视频服务接口
+│   │           ├── utils         # 工具类目录：纯静态/无状态工具（开箱即用）
+│   │           │   ├── FileNormalOperationUtils.java # 文件常规操作工具
+│   │           │   ├── FileUtil.java              # 文件核心工具（上传/下载）
+│   │           │   ├── GroupChat.java             # 群聊工具
+│   │           │   ├── IPUtil.java                # IP工具（解析/校验）
+│   │           │   ├── JwtUtil.java               # JWT工具（生成/解析）
+│   │           │   ├── LocalStorageUtils.java     # 本地存储工具（视频/封面）
+│   │           │   ├── PageUtil.java              # 分页工具（分页参数处理）
+│   │           │   ├── RedisUtil.java             # Redis工具（通用操作）
+│   │           │   ├── SaltMD5Util.java           # MD5加盐加密工具
+│   │           │   ├── SnowflakeIdGeneratorUtil.java # 雪花算法ID生成工具
+│   │           │   ├── SnowUtil.java              # 雪花算法简化版
+│   │           │   ├── TestUtil.java              # 测试工具
+│   │           │   ├── ThreadLocalUtil.java       # ThreadLocal工具（上下文传递）
+│   │           │   └── TokenUtil.java             # Token工具（刷新/校验）
+│   │           └── Work4Application.java          # 项目启动类（SpringBoot入口）
+│   └── resources                 # 资源文件目录（非Java代码）
+│       ├── application.yml       # 核心配置文件（数据源/线程池/Redis等）
+│       ├── logback.xml           # 日志配置文件（日志级别/输出路径/格式）
+│       ├── lua                   # Lua脚本目录：Redis限流脚本
+│       │   └── limit.lua          # 分布式限流Lua脚本（原子性控制）
+│       ├── mapper                # MyBatis映射文件目录（SQL语句）
+│       │   ├── UserDao.xml        # 用户DAO映射文件
+│       │   ├── UserRelationDao.xml # 用户关系DAO映射文件
+│       │   └── VideoDao.xml       # 视频DAO映射文件
+│       ├── static                # 静态资源目录（前端页面/文件存储）
+│       │   ├── avatars           # 头像存储目录
+│       │   ├── File              # 通用文件存储目录
+│       │   ├── login.html        # 登录页面
+│       │   ├── register.html     # 注册页面
+│       │   ├── UI.html           # 主界面
+│       │   ├── videoCovers       # 视频封面存储目录
+│       │   ├── videoPost.html    # 视频投稿页面
+│       │   └── videos            # 视频文件存储目录
+│       └── templates             # 模板文件目录（Thymeleaf等模板引擎）
+│           ├── index.html        # 首页模板
+│           └── video.html        # 视频播放页面
+├── project_structure.txt         # 项目结构说明文件
+└── test                          # 测试源码目录（单元测试/集成测试）
+    └── java
+        └── com
+            └── peanut
+                ├── Test01.java                   # 通用测试类
+                └── Work4ApplicationTests.java    # 项目启动测试类

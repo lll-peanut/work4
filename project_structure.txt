@@ -1,0 +1,184 @@
+.
+├── HELP.md
+├── logs
+│   ├── java0.log
+│   └── test.log
+├── mvnw
+├── mvnw.cmd
+├── pom.xml
+├── project_structure.txt
+└── src
+    ├── main
+    │   ├── java
+    │   │   └── com
+    │   │       └── peanut
+    │   │           ├── annotation
+    │   │           │   ├── CurrentUserId.java
+    │   │           │   ├── DistributedLock.java
+    │   │           │   ├── RedisLimitAnnotation.java
+    │   │           │   ├── RedisLimitOnClassAnnotation.java
+    │   │           │   └── SystemLog.java
+    │   │           ├── apsect
+    │   │           │   ├── DistributedLockAspect.java
+    │   │           │   ├── RedisLimitAspect.java
+    │   │           │   ├── RedisLimitOnCLassAspect.java
+    │   │           │   └── SystemLogAspect.java
+    │   │           ├── config
+    │   │           │   ├── AsyncThreadPoolConfig.java
+    │   │           │   ├── DefaultSecurityConfig.java
+    │   │           │   ├── MpConfig.java
+    │   │           │   ├── RedisConfig.java
+    │   │           │   ├── SpringContextHolder.java
+    │   │           │   ├── WebConfig.java
+    │   │           │   └── WebSocketConfig.java
+    │   │           ├── constant
+    │   │           │   ├── BusinessConstant.java
+    │   │           │   └── Code.java
+    │   │           ├── controller
+    │   │           │   ├── FileController.java
+    │   │           │   ├── GroupSocketServer.java
+    │   │           │   ├── InterationController.java
+    │   │           │   ├── SocialController.java
+    │   │           │   ├── TokenRefreshController.java
+    │   │           │   ├── UserController.java
+    │   │           │   ├── VideoController.java
+    │   │           │   └── WebSocketServer.java
+    │   │           ├── Dao
+    │   │           │   ├── CommentDao.java
+    │   │           │   ├── GroupDao.java
+    │   │           │   ├── LikeDao.java
+    │   │           │   ├── SubscribeDao.java
+    │   │           │   ├── UserDao2.java
+    │   │           │   ├── UserDao.java
+    │   │           │   ├── UserRelationDao.java
+    │   │           │   ├── VideoDao.java
+    │   │           │   └── VideoLikeDao.java
+    │   │           ├── enumPackage
+    │   │           │   └── LimitTypeEnum.java
+    │   │           ├── expection
+    │   │           │   ├── BusinessException.java
+    │   │           │   └── SystemException.java
+    │   │           ├── filter
+    │   │           │   └── JwtAuthenticationFilter.java
+    │   │           ├── handler
+    │   │           │   ├── GlobalExpectionHandler.java
+    │   │           │   ├── LoginFailureHandler.java
+    │   │           │   └── LoginSuccessHandler.java
+    │   │           ├── interceptor
+    │   │           │   └── LoginInterceptor.java
+    │   │           ├── lock
+    │   │           │   └── Redisson1Lock.java
+    │   │           ├── POJO
+    │   │           │   ├── Base.java
+    │   │           │   ├── Comment.java
+    │   │           │   ├── CommentLike.java
+    │   │           │   ├── CustomUserDetails.java
+    │   │           │   ├── DTO
+    │   │           │   │   ├── PageQueryDTO.java
+    │   │           │   │   ├── RelationActionDTO.java
+    │   │           │   │   ├── UserPageQueryDTO.java
+    │   │           │   │   ├── VideoPostDTO.java
+    │   │           │   │   └── VideoSearchDTO.java
+    │   │           │   ├── Friend.java
+    │   │           │   ├── Group.java
+    │   │           │   ├── Like.java
+    │   │           │   ├── Message.java
+    │   │           │   ├── POJOList.java
+    │   │           │   ├── Resp.java
+    │   │           │   ├── Subscribe.java
+    │   │           │   ├── User.java
+    │   │           │   ├── UserRelation.java
+    │   │           │   ├── Video.java
+    │   │           │   ├── VideoLike.java
+    │   │           │   └── VO
+    │   │           │       ├── PageVO.java
+    │   │           │       └── UserVO.java
+    │   │           ├── resolve
+    │   │           │   └── CurrentUserArgumentResolver.java
+    │   │           ├── service
+    │   │           │   ├── CommentService.java
+    │   │           │   ├── CustomUserDetailsService.java
+    │   │           │   ├── Imp
+    │   │           │   │   ├── CommentServiceImp.java
+    │   │           │   │   ├── InterationServiceImp.java
+    │   │           │   │   ├── RedisServiceImp.java
+    │   │           │   │   ├── SocialServiceImp.java
+    │   │           │   │   ├── UserServiceImp.java
+    │   │           │   │   └── VideoServiceImp.java
+    │   │           │   ├── InterationService.java
+    │   │           │   ├── RedisService.java
+    │   │           │   ├── SocialService.java
+    │   │           │   ├── UserService.java
+    │   │           │   ├── VideoPostService.java
+    │   │           │   └── VideoService.java
+    │   │           ├── utils
+    │   │           │   ├── FileNormalOperationUtils.java
+    │   │           │   ├── FileUtil.java
+    │   │           │   ├── GroupChat.java
+    │   │           │   ├── IPUtil.java
+    │   │           │   ├── JwtUtil.java
+    │   │           │   ├── LocalStorageUtils.java
+    │   │           │   ├── PageUtil.java
+    │   │           │   ├── RedisUtil.java
+    │   │           │   ├── SaltMD5Util.java
+    │   │           │   ├── SnowflakeIdGeneratorUtil.java
+    │   │           │   ├── SnowUtil.java
+    │   │           │   ├── TestUtil.java
+    │   │           │   ├── ThreadLocalUtil.java
+    │   │           │   └── TokenUtil.java
+    │   │           └── Work4Application.java
+    │   └── resources
+    │       ├── application.yml
+    │       ├── logback.xml
+    │       ├── lua
+    │       │   └── limit.lua
+    │       ├── mapper
+    │       │   ├── UserDao.xml
+    │       │   ├── UserRelationDao.xml
+    │       │   └── VideoDao.xml
+    │       ├── static
+    │       │   ├── avatars
+    │       │   │   ├── 07e58a3f-11bc-432d-8edb-ad4649a35d9a.png
+    │       │   │   ├── 1cc57634-a232-423e-ae4f-eb317284c77c.png
+    │       │   │   ├── 3eaa9f01-773a-4bb3-8c72-92094fd598dc.png
+    │       │   │   ├── 577e0e6c-2086-4b3f-8a83-a1c70e53afd2.png
+    │       │   │   └── d92cea64-9e6d-4a3c-9e05-ce851156a223.png
+    │       │   ├── avatars8094e6c3-d3f7-4259-b0bb-636a1de8a791.png
+    │       │   ├── config
+    │       │   ├── File
+    │       │   │   └── ceca3c4e-8f64-409c-8448-d166d90835aa.png
+    │       │   ├── File0f669d1f-6875-49f6-a1d1-34e2b5852e4bpng
+    │       │   ├── File4c989eaa-c0d1-4bfd-8239-359184d7b495.png
+    │       │   ├── Fileda058cec-739f-467f-bf6f-f3a4da23b986png
+    │       │   ├── login.html
+    │       │   ├── Properties
+    │       │   │   ├── logging.properties
+    │       │   │   └── log.properties
+    │       │   ├── register.html
+    │       │   ├── UI.html
+    │       │   ├── videoCovers
+    │       │   │   ├── 2557c85c-737d-4631-974b-41a45063c020.png
+    │       │   │   ├── 2bac62df-9b3c-409a-b25e-d0f47f94c9a2.png
+    │       │   │   ├── 74155b01-f72c-4531-a956-08586b1cbfe2.png
+    │       │   │   ├── 9e5cc776-dd2d-4c91-9cdf-d14d431528fd.png
+    │       │   │   ├── cb69fc3c-6dc6-464f-94db-e4ebbe09bfc6.png
+    │       │   │   └── e1c24041-4c88-454d-91dd-9314aca4ec78.png
+    │       │   ├── videoPost.html
+    │       │   └── videos
+    │       │       ├── 058f2ccc-f3f2-46c8-afe3-0ea0640ab1ac.mp4
+    │       │       ├── 0daf425e-9f29-48b0-b76a-e82011a6864f.mp4
+    │       │       ├── 1d313446-d833-448c-b0b1-b1592122dbd6.mp4
+    │       │       ├── 548fe82c-5ebe-41a3-a7a5-0f7012205aab.mp4
+    │       │       ├── 6b006067-3089-4f27-99e2-89c62f583a5c.mp4
+    │       │       └── 91d797dd-9288-47e6-af2d-a1adbc80792d.mp4
+    │       └── templates
+    │           ├── index.html
+    │           └── video.html
+    └── test
+        └── java
+            └── com
+                └── peanut
+                    ├── Test01.java
+                    └── Work4ApplicationTests.java
+
+41 directories, 141 files
